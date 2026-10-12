@@ -1,0 +1,12 @@
+{
+  "name": "lojinha-ux",
+  "private": true,
+  "scripts": {
+    "instalar": "npm install && npm install --prefix api && npm install --prefix web",
+    "banco": "docker compose up -d",
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev --prefix api\" \"npm run dev --prefix web\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}
