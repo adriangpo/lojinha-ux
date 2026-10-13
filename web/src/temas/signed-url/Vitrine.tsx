@@ -14,7 +14,7 @@ export function Vitrine({ itens }: { itens: ItemDaVitrine[] }) {
   return (
     <Stack>
       <Alert variant="light">
-        URLs assinadas às <b>{hora}</b>. Dê F5 e veja se a hora muda (e a aba Network do DevTools).
+        URLs assinadas às <b>{hora}</b>. Dê F5 e veja se a hora muda, e na aba Rede ao lado se as fotos vieram da rede ou do cache.
       </Alert>
       <SimpleGrid cols={{ base: 2, md: 4 }}>
         {itens.map((item) => (

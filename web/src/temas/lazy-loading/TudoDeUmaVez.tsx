@@ -8,7 +8,7 @@ export function TudoDeUmaVez() {
   return (
     <Stack>
       <ContadorDeDownloads />
-      <SimpleGrid cols={4}>
+      <SimpleGrid cols={2}>
         {FOTOS.map((id) => (
           <img key={id} src={`/api/imagens/${id}`} width={640} height={480} style={{ width: '100%', height: 'auto' }} />
         ))}

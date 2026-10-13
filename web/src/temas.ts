@@ -29,6 +29,7 @@ import { ListaComSpinner } from './temas/skeleton/ListaComSpinner'
 import { ImagemComEspacoReservado } from './temas/layout-shift/ImagemComEspacoReservado'
 import { ImagemSemTamanho } from './temas/layout-shift/ImagemSemTamanho'
 import { ScrollComThrottle } from './temas/debounce/ScrollComThrottle'
+import { ScrollSemThrottle } from './temas/debounce/ScrollSemThrottle'
 import { FavoritarEsperando } from './temas/optimistic-ui/FavoritarEsperando'
 import { FavoritarNaHora } from './temas/optimistic-ui/FavoritarNaHora'
 import { ComPolling } from './temas/upload/ComPolling'
@@ -132,7 +133,8 @@ export const TEMAS: Tema[] = [
     versoes: [
       { nome: 'Sem debounce', componente: BuscaSemDebounce },
       { nome: 'Com debounce', componente: BuscaComDebounce },
-      { nome: 'Throttle no scroll', componente: ScrollComThrottle },
+      { nome: 'Scroll sem throttle', componente: ScrollSemThrottle },
+      { nome: 'Scroll com throttle', componente: ScrollComThrottle },
     ],
   },
   {

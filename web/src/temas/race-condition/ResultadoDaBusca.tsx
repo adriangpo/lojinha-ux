@@ -21,7 +21,7 @@ export function ResultadoDaBusca({ digitado, resultado }: Props) {
   return (
     <Stack>
       <Text size="lg" fw={600} c={bate ? 'green.8' : 'red.7'}>
-        Resultados para “{resultado.busca}”
+        {resultado.busca ? `Resultados para “${resultado.busca}”` : 'Todos os produtos'}
       </Text>
       <ListaDeProdutos produtos={resultado.produtos} />
     </Stack>
