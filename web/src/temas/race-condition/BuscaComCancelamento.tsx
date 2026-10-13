@@ -2,7 +2,8 @@ import { Stack } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import { CampoDeBusca } from '../../componentes/CampoDeBusca'
 import { monitor } from '../../lib/monitor'
-import { buscarProdutos } from '../../lib/produtos'
+import { buscarComDemora } from './buscaLenta'
+import { CorridaDasBuscas } from './CorridaDasBuscas'
 import { ResultadoDaBusca, type Resultado } from './ResultadoDaBusca'
 
 export function BuscaComCancelamento() {
@@ -12,7 +13,7 @@ export function BuscaComCancelamento() {
   useEffect(() => {
     const controller = new AbortController()
 
-    buscarProdutos({ busca }, controller.signal)
+    buscarComDemora(busca, controller.signal)
       .then((produtos) => {
         setResultado({ busca, produtos })
         monitor.tela(`mostrou resultados de “${busca}”`)
@@ -30,6 +31,7 @@ export function BuscaComCancelamento() {
   return (
     <Stack>
       <CampoDeBusca valor={busca} aoMudar={setBusca} />
+      <CorridaDasBuscas digitado={busca} />
       <ResultadoDaBusca digitado={busca} resultado={resultado} />
     </Stack>
   )

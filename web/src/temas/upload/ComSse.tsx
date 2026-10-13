@@ -1,4 +1,4 @@
-import { Stack, Text } from '@mantine/core'
+import { Alert, Stack, Text } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import { monitor } from '../../lib/monitor'
 import { BarraDaFase } from './BarraDaFase'
@@ -9,16 +9,25 @@ export function ComSse() {
   const [envio, setEnvio] = useState<number>()
   const [idDoUpload, setIdDoUpload] = useState<number>()
   const [status, setStatus] = useState<StatusDoUpload>()
+  const [erro, setErro] = useState<string>()
   const [avisos, setAvisos] = useState(0)
 
   async function enviar(arquivo: File) {
     setIdDoUpload(undefined)
     setStatus(undefined)
     setAvisos(0)
+    setErro(undefined)
     setEnvio(0)
-    const { id } = await enviarArquivo(arquivo, setEnvio)
-    setIdDoUpload(id)
-    monitor.tela('envio 100%, processando…')
+    try {
+      const { id } = await enviarArquivo(arquivo, setEnvio)
+      setIdDoUpload(id)
+      monitor.tela('envio 100%, processando…')
+    } catch (falha) {
+      // Falhou no meio: diz o que houve e libera o botão para tentar de novo.
+      setEnvio(undefined)
+      setErro(falha instanceof Error ? falha.message : 'Não foi possível enviar o arquivo')
+      monitor.tela('aviso de erro no envio')
+    }
   }
 
   // Fase 2: uma conexão só, e o servidor avisa a cada mudança (Postgres NOTIFY → API → SSE).
@@ -54,6 +63,7 @@ export function ComSse() {
   return (
     <Stack maw={640}>
       <EscolherArquivo aoEnviar={enviar} enviando={envio !== undefined && idDoUpload === undefined} />
+      {erro && <Alert color="red">{erro}. Tente de novo.</Alert>}
       {envio !== undefined && <BarraDaFase titulo="1. Envio do arquivo" valor={envio} legenda={`${envio}%`} />}
       {idDoUpload !== undefined && (
         <>

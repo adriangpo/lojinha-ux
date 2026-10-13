@@ -7,14 +7,19 @@ import { enviarArquivo } from './enviarArquivo'
 // Quanto falta? Travou? Já dá para usar a imagem?
 // O usuário não sabe nada: nem do envio, nem do processamento que continua no servidor.
 export function SemProgresso() {
-  const [estado, setEstado] = useState<'parado' | 'enviando' | 'enviado'>('parado')
+  const [estado, setEstado] = useState<'parado' | 'enviando' | 'enviado' | 'erro'>('parado')
 
   async function enviar(arquivo: File) {
     setEstado('enviando')
     monitor.tela('spinner, sem saber quanto falta')
-    await enviarArquivo(arquivo)
-    setEstado('enviado')
-    monitor.tela('"estamos processando" — até quando?')
+    try {
+      await enviarArquivo(arquivo)
+      setEstado('enviado')
+      monitor.tela('"estamos processando" — até quando?')
+    } catch {
+      setEstado('erro')
+      monitor.tela('“Erro no envio”')
+    }
   }
 
   return (
@@ -27,6 +32,7 @@ export function SemProgresso() {
         </Group>
       )}
       {estado === 'enviado' && <Alert color="gray">Arquivo recebido. Estamos processando.</Alert>}
+      {estado === 'erro' && <Alert color="red">Erro no envio.</Alert>}
     </Stack>
   )
 }

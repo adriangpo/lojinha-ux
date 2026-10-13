@@ -1,6 +1,7 @@
 import { Badge, Group, SegmentedControl, Stack, Text, Title } from '@mantine/core'
 import { Navigate, useParams, useSearchParams } from 'react-router'
 import { TEMAS, type Etiqueta } from '../temas'
+import { VerCodigo } from './VerCodigo'
 
 const CORES: Record<Etiqueta, string> = {
   Frontend: 'blue',
@@ -29,16 +30,19 @@ export function PaginaDoTema() {
           </Badge>
         </Group>
 
-        {tema.versoes.length > 1 && (
-          <SegmentedControl
-            // Um seletor novo por tema: reaproveitado, o Mantine perde a marcação azul
-            // quando o tema seguinte tem o mesmo número de versões.
-            key={tema.slug}
-            data={tema.versoes.map((v) => v.nome)}
-            value={versao.nome}
-            onChange={(nome) => setParametros({ versao: nome })}
-          />
-        )}
+        <Group>
+          {versao && <VerCodigo key={`codigo-${tema.slug}`} titulo={tema.titulo} versoes={tema.versoes} versaoDaPagina={versao.nome} />}
+          {tema.versoes.length > 1 && (
+            <SegmentedControl
+              // Um seletor novo por tema: reaproveitado, o Mantine perde a marcação azul
+              // quando o tema seguinte tem o mesmo número de versões.
+              key={tema.slug}
+              data={tema.versoes.map((v) => v.nome)}
+              value={versao.nome}
+              onChange={(nome) => setParametros({ versao: nome })}
+            />
+          )}
+        </Group>
       </Group>
 
       {versao ? <versao.componente key={`${tema.slug}/${versao.nome}`} /> : <Text c="dimmed">Em construção.</Text>}

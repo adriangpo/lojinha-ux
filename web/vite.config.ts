@@ -4,6 +4,8 @@ import { defineConfig } from 'vite'
 export default defineConfig({
   plugins: [react()],
   server: {
+    // O botão "Ver código" lê as rotas da API (../api), fora da pasta do front.
+    fs: { allow: ['..'] },
     // O front chama /api/... e o Vite repassa para a API (sem precisar de CORS).
     proxy: {
       '/api': 'http://localhost:3333',

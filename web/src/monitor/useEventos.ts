@@ -26,21 +26,23 @@ export type Trecho = {
 const LIMITE = 600
 
 // Junta os eventos das duas fontes: navegador (BroadcastChannel) e API (SSE).
-export function useEventos() {
+// `daApi: false` dispensa a conexão SSE: cada uma ocupa uma das 6 conexões que o navegador
+// abre por servidor, e as que sobram são as que as requisições da lojinha podem usar.
+export function useEventos({ daApi = true } = {}) {
   const [trechos, setTrechos] = useState<Trecho[]>([])
 
   useEffect(() => {
     const receber = (evento: EventoMonitor) => setTrechos((atuais) => aplicar(atuais, evento))
 
     const pararDeOuvirNavegador = ouvirNavegador(receber)
-    const fonteDaApi = new EventSource('/api/monitor/eventos')
-    fonteDaApi.onmessage = (mensagem) => receber(JSON.parse(mensagem.data))
+    const fonteDaApi = daApi ? new EventSource('/api/monitor/eventos') : undefined
+    if (fonteDaApi) fonteDaApi.onmessage = (mensagem) => receber(JSON.parse(mensagem.data))
 
     return () => {
       pararDeOuvirNavegador()
-      fonteDaApi.close()
+      fonteDaApi?.close()
     }
-  }, [])
+  }, [daApi])
 
   return { trechos, limpar: () => setTrechos([]) }
 }
