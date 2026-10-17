@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useEventos, type Trecho } from '../monitor/useEventos'
-import { PainelDeRede } from './PainelDeRede'
+import { CAMADAS, PainelDeRede } from './PainelDeRede'
 
 // Versão compacta do monitor, ao lado da lojinha, imitando o console do Firefox:
 // uma linha por evento, na ordem em que aconteceram.
@@ -23,12 +23,13 @@ const NOME_DO_STATUS: Record<number, string> = {
 type Aba = 'console' | 'rede'
 
 // O painel inteiro, com as abas do DevTools do Firefox no topo.
-export function MiniConsole() {
+export function MiniConsole({ fechar }: { fechar: () => void }) {
   const { trechos, limpar } = useEventos()
   const [aba, setAba] = useState<Aba>('rede')
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white' }}>
+    // cursor default: como no DevTools, seta normal em tudo (nem mãozinha nos botões, nem cursor de texto nas linhas).
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'white', cursor: 'default' }}>
       <div style={{ display: 'flex', height: 30, background: '#f9f9fb', borderBottom: '1px solid #e0e0e2', fontFamily: 'system-ui, sans-serif' }}>
         {(['console', 'rede'] as Aba[]).map((nome) => (
           <button
@@ -36,7 +37,7 @@ export function MiniConsole() {
             onClick={() => setAba(nome)}
             style={{
               display: 'flex', alignItems: 'center', gap: 6, border: 'none', background: 'transparent', padding: '0 12px',
-              fontSize: 13, cursor: 'pointer', color: aba === nome ? '#0061e0' : '#15141a',
+              fontSize: 13, color: aba === nome ? '#0061e0' : '#15141a',
               borderTop: aba === nome ? '2px solid #0061e0' : '2px solid transparent',
             }}
           >
@@ -44,6 +45,11 @@ export function MiniConsole() {
             {nome === 'console' ? 'Console' : 'Rede'}
           </button>
         ))}
+        <span style={{ flex: 1 }} />
+        {/* Fecha o painel, como o ✕ do DevTools; o botão Console no topo abre de novo. */}
+        <button onClick={fechar} title="Fechar o painel" aria-label="Fechar o painel" style={{ ...estiloDoBotao, height: '100%', width: 30, fontSize: 14, color: '#5b5b66' }}>
+          ✕
+        </button>
       </div>
       <div style={{ flex: 1, minHeight: 0 }}>
         {aba === 'console' ? <PainelDoConsole trechos={trechos} limpar={limpar} /> : <PainelDeRede trechos={trechos} limpar={limpar} />}
@@ -72,11 +78,11 @@ function IconeDaRede() {
 function PainelDoConsole({ trechos, limpar }: { trechos: Trecho[]; limpar: () => void }) {
   const [filtro, setFiltro] = useState('')
   const [niveisAtivos, setNiveisAtivos] = useState<Record<Nivel, boolean>>({ erro: true, aviso: true, info: true })
-  const fundo = useRef<HTMLDivElement>(null)
+  const lista = useRef<HTMLDivElement>(null)
 
-  // Acompanha o último evento, como o console faz.
+  // Acompanha o último evento, como o console faz (rolando só a lista, não a página).
   useEffect(() => {
-    fundo.current?.scrollIntoView({ block: 'end' })
+    if (lista.current) lista.current.scrollTop = lista.current.scrollHeight
   }, [trechos])
 
   const visiveis = trechos.filter(
@@ -112,11 +118,12 @@ function PainelDoConsole({ trechos, limpar }: { trechos: Trecho[]; limpar: () =>
         ))}
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      {/* overscrollBehavior: no fim da lista, a roda do mouse não passa para a página. */}
+      <div ref={lista} style={{ flex: 1, overflowY: 'auto', overscrollBehavior: 'contain' }}>
         {visiveis.map((trecho) => (
           <Linha key={trecho.id} trecho={trecho} />
         ))}
-        <div ref={fundo} style={{ padding: '3px 6px', color: '#0074e8' }}>
+        <div style={{ padding: '3px 6px', color: '#0074e8' }}>
           <span>»</span>
         </div>
       </div>
@@ -126,7 +133,7 @@ function PainelDoConsole({ trechos, limpar }: { trechos: Trecho[]; limpar: () =>
 
 const estiloDoBotao: CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 22,
-  border: 'none', borderRadius: 2, background: 'transparent', cursor: 'pointer', padding: 0,
+  border: 'none', borderRadius: 2, background: 'transparent', padding: 0,
 }
 
 function nivelDo(trecho: Trecho): Nivel {
@@ -162,7 +169,7 @@ function Linha({ trecho }: { trecho: Trecho }) {
     <div style={{ background: cores.fundo, borderTop: `1px solid ${cores.borda}`, marginTop: -1, color: cores.texto }}>
       <div
         onClick={expansivel ? () => setAberta(!aberta) : undefined}
-        style={{ display: 'flex', alignItems: 'flex-start', gap: 4, padding: '3px 6px', paddingLeft: trecho.pai ? 22 : 6, cursor: expansivel ? 'pointer' : 'default', lineHeight: '15px' }}
+        style={{ display: 'flex', alignItems: 'flex-start', gap: 4, padding: '3px 6px', paddingLeft: trecho.pai ? 22 : 6, lineHeight: '15px' }}
       >
         <span style={{ width: 12, flexShrink: 0, textAlign: 'center' }}>
           {nivel === 'erro' && <IconeDeErro />}
@@ -175,7 +182,7 @@ function Linha({ trecho }: { trecho: Trecho }) {
         <span style={{ flex: 1, minWidth: 0, wordBreak: 'break-word', whiteSpace: 'pre-wrap', color: emCache ? '#058b00' : undefined }}>
           {textoDa(trecho)}
         </span>
-        <span style={{ flexShrink: 0, color: '#5b5b66' }}>{origem}</span>
+        <span style={{ flexShrink: 0, color: CAMADAS[trecho.faixa]?.texto ?? '#5b5b66' }}>{origem}</span>
       </div>
 
       {aberta && detalhes && (

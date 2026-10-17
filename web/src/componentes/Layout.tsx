@@ -1,6 +1,6 @@
 import { AppShell, Burger, Button, Group, NavLink, ScrollArea, Text, Title } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink as LinkDaRota, Outlet } from 'react-router'
 import { observarNavegador } from '../lib/monitor'
 import { BLOCOS, TEMAS } from '../temas'
@@ -11,13 +11,17 @@ export function Layout() {
   // Mostra no monitor as imagens e os saltos de layout, que não passam pelo lib/api.ts.
   useEffect(observarNavegador, [])
   const [menuAberto, { toggle: alternarMenu }] = useDisclosure(true)
-  const [consoleAberto, { toggle: alternarConsole }] = useDisclosure(true)
+  const [consoleAberto, { toggle: alternarConsole, close: fecharConsole }] = useDisclosure(true)
+  const [larguraDoConsole, setLarguraDoConsole] = useState(480)
+  const [arrastando, setArrastando] = useState(false)
 
   return (
     <AppShell
       header={{ height: 60 }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { desktop: !menuAberto, mobile: !menuAberto } }}
-      aside={{ width: 480, breakpoint: 'md', collapsed: { desktop: !consoleAberto, mobile: true } }}
+      aside={{ width: larguraDoConsole, breakpoint: 'md', collapsed: { desktop: !consoleAberto, mobile: true } }}
+      // Sem animação enquanto arrasta, senão o painel fica atrás do mouse.
+      transitionDuration={arrastando ? 0 : 200}
       padding="lg"
     >
       <AppShell.Header>
@@ -60,7 +64,22 @@ export function Layout() {
       </AppShell.Navbar>
 
       <AppShell.Aside>
-        <MiniConsole />
+        {/* Borda arrastável, como a divisória do DevTools. O pointer capture segue o mouse mesmo fora dela. */}
+        <div
+          onPointerDown={(evento) => {
+            evento.preventDefault()
+            evento.currentTarget.setPointerCapture(evento.pointerId)
+            setArrastando(true)
+          }}
+          onPointerMove={(evento) => {
+            if (!arrastando) return
+            const largura = window.innerWidth - evento.clientX
+            setLarguraDoConsole(Math.min(Math.max(largura, 320), window.innerWidth * 0.7))
+          }}
+          onPointerUp={() => setArrastando(false)}
+          style={{ position: 'absolute', top: 0, bottom: 0, left: -3, width: 6, cursor: 'col-resize', zIndex: 1 }}
+        />
+        <MiniConsole fechar={fecharConsole} />
       </AppShell.Aside>
 
       <AppShell.Main>
