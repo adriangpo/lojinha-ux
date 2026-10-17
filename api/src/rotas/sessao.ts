@@ -24,7 +24,7 @@ function exigirSessao(req: Request, res: Response, next: NextFunction) {
 
 export const rotasDeSessao = Router()
 
-// POST /api/login  { email, senha } — qualquer e-mail e senha preenchidos servem.
+// POST /api/login  { email, senha } - qualquer e-mail e senha preenchidos servem.
 rotasDeSessao.post('/login', (req, res) => {
   if (!req.body.email || !req.body.senha) {
     res.status(400).json({ erro: 'Preencha e-mail e senha' })
@@ -38,12 +38,12 @@ rotasDeSessao.post('/login', (req, res) => {
   res.json({ ok: true })
 })
 
-// GET /api/sessao — a tela pergunta se ainda está logada.
+// GET /api/sessao - a tela pergunta se ainda está logada.
 rotasDeSessao.get('/sessao', exigirSessao, (_req, res) => {
   res.json({ ok: true })
 })
 
-// POST /api/cadastros  { ...campos } — só aceita com sessão válida.
+// POST /api/cadastros  { ...campos } - só aceita com sessão válida.
 rotasDeSessao.post('/cadastros', exigirSessao, (req, res) => {
   res.status(201).json({ mensagem: `Cadastro de ${req.body.nome} salvo!` })
 })

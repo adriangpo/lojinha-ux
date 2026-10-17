@@ -7,7 +7,7 @@ const POR_PAGINA = 10
 
 export const rotasDePaginacao = Router()
 
-// GET /api/feed/offset?pagina=2 — "pula os 10 primeiros e me dá os próximos 10".
+// GET /api/feed/offset?pagina=2 - "pula os 10 primeiros e me dá os próximos 10".
 // Se alguém publicar no meio do caminho, tudo anda uma posição e um item aparece repetido.
 rotasDePaginacao.get('/feed/offset', async (req, res) => {
   const pagina = Number(req.query.pagina ?? 1)
@@ -21,7 +21,7 @@ rotasDePaginacao.get('/feed/offset', async (req, res) => {
   res.json({ itens, totalDePaginas: Math.ceil(total / POR_PAGINA) })
 })
 
-// GET /api/feed/cursor?depoisDe=91 — "me dá os 10 que vêm depois do item 91".
+// GET /api/feed/cursor?depoisDe=91 - "me dá os 10 que vêm depois do item 91".
 // O cursor aponta para um item, não para uma posição: publicações novas não mudam nada.
 rotasDePaginacao.get('/feed/cursor', async (req, res) => {
   const depoisDe = req.query.depoisDe ? Number(req.query.depoisDe) : null
@@ -39,7 +39,7 @@ rotasDePaginacao.get('/feed/cursor', async (req, res) => {
   res.json({ itens, proximoCursor })
 })
 
-// POST /api/feed — simula outra pessoa publicando enquanto o usuário rola.
+// POST /api/feed - simula outra pessoa publicando enquanto o usuário rola.
 rotasDePaginacao.post('/feed', async (_req, res) => {
   const [publicacao] = await sql<Publicacao>(
     "INSERT INTO publicacoes (texto) VALUES ('Publicação nova') RETURNING id, texto",

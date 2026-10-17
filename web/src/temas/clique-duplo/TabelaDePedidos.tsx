@@ -46,7 +46,7 @@ export function TabelaDePedidos({ atualizacao }: { atualizacao: number }) {
               <Table.Tr key={pedido.id}>
                 <Table.Td>{pedido.id}</Table.Td>
                 <Table.Td>{pedido.produto}</Table.Td>
-                <Table.Td>{pedido.chave?.slice(0, 8) ?? '—'}</Table.Td>
+                <Table.Td>{pedido.chave?.slice(0, 8) ?? '-'}</Table.Td>
                 <Table.Td>{new Date(pedido.criadoEm).toLocaleTimeString('pt-BR')}</Table.Td>
               </Table.Tr>
             ))}

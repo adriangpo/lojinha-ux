@@ -11,7 +11,7 @@ type Pedido = {
 
 export const rotasDePedidos = Router()
 
-// GET /api/pedidos — a tabela que aparece embaixo do botão "Comprar".
+// GET /api/pedidos - a tabela que aparece embaixo do botão "Comprar".
 rotasDePedidos.get('/pedidos', async (_req, res) => {
   const pedidos = await sql<Pedido>(
     `SELECT pedidos.id, produtos.nome AS produto, chave_de_idempotencia AS chave, criado_em AS "criadoEm"
@@ -21,7 +21,7 @@ rotasDePedidos.get('/pedidos', async (_req, res) => {
   res.json(pedidos)
 })
 
-// DELETE /api/pedidos — zera a tabela entre uma versão e outra da demo.
+// DELETE /api/pedidos - zera a tabela entre uma versão e outra da demo.
 rotasDePedidos.delete('/pedidos', async (_req, res) => {
   await sql('DELETE FROM pedidos')
   res.json({ ok: true })

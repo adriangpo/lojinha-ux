@@ -50,8 +50,8 @@ function validarCupom(req: Request, res: Response) {
 
 export const rotasDeCupons = Router()
 
-// POST /api/cupons/sem-limite  { codigo } — dá para testar mil códigos por segundo.
+// POST /api/cupons/sem-limite  { codigo } - dá para testar mil códigos por segundo.
 rotasDeCupons.post('/cupons/sem-limite', validarCupom)
 
-// POST /api/cupons/com-limite  { codigo } — o mesmo, com o limitador na frente.
+// POST /api/cupons/com-limite  { codigo } - o mesmo, com o limitador na frente.
 rotasDeCupons.post('/cupons/com-limite', limitar, validarCupom)

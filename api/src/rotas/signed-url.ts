@@ -16,7 +16,7 @@ async function produtosDaVitrine() {
 
 export const rotasDeSignedUrl = Router()
 
-// GET /api/vitrine/url-nova — assina cada foto na hora do pedido.
+// GET /api/vitrine/url-nova - assina cada foto na hora do pedido.
 // A data da assinatura vai na URL: a cada F5 a URL muda e, para o navegador, é outro arquivo.
 rotasDeSignedUrl.get('/vitrine/url-nova', async (_req, res) => {
   const produtos = await produtosDaVitrine()
@@ -33,7 +33,7 @@ rotasDeSignedUrl.get('/vitrine/url-nova', async (_req, res) => {
   res.json(vitrine)
 })
 
-// GET /api/vitrine/url-reaproveitada — assina como se fosse o começo da hora.
+// GET /api/vitrine/url-reaproveitada - assina como se fosse o começo da hora.
 // Durante a mesma hora a URL é idêntica, então o navegador usa a foto que já tem no cache.
 rotasDeSignedUrl.get('/vitrine/url-reaproveitada', async (_req, res) => {
   const produtos = await produtosDaVitrine()

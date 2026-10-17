@@ -32,7 +32,7 @@ rotasDeProdutos.get('/produtos', async (req, res) => {
 
 const esperar = (ms: number) => new Promise((resolver) => setTimeout(resolver, ms))
 
-// GET /api/busca-lenta?busca=te — só para o tema Race conditions.
+// GET /api/busca-lenta?busca=te - só para o tema Race conditions.
 // Busca curta casa com mais produtos e demora mais: "f" leva ~2,1s, "fone" ~0,6s.
 // Quem digita rápido recebe as respostas na ordem inversa, todas as vezes.
 // Sem busca (a lista inicial), responde na hora.
