@@ -25,7 +25,7 @@ rotasDeNMais1.get('/vendedores/:id', async (req, res) => {
   res.json(vendedor)
 })
 
-// GET /api/produtos/7/comentarios — devolve só os ids: o detalhe de cada um é outro endpoint.
+// GET /api/produtos/7/comentarios - devolve só os ids: o detalhe de cada um é outro endpoint.
 rotasDeNMais1.get('/produtos/:id/comentarios', async (req, res) => {
   const linhas = await sql<{ id: number }>('SELECT id FROM comentarios WHERE produto_id = $1 ORDER BY id', [
     req.params.id,

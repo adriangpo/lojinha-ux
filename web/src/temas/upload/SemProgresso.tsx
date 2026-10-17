@@ -15,7 +15,7 @@ export function SemProgresso() {
     try {
       await enviarArquivo(arquivo)
       setEstado('enviado')
-      monitor.tela('"estamos processando" — até quando?')
+      monitor.tela('"estamos processando" - até quando?')
     } catch {
       setEstado('erro')
       monitor.tela('“Erro no envio”')

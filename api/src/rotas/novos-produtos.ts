@@ -49,7 +49,7 @@ async function salvar({ nome, categoria, precoCentavos }: Cadastro) {
 }
 
 // Versão ruim: a API sabe exatamente o que está errado, mas joga a informação fora.
-// Status 500 diz "o servidor quebrou" — e não quebrou, o dado é que veio errado.
+// Status 500 diz "o servidor quebrou" - e não quebrou, o dado é que veio errado.
 rotasDeNovosProdutos.post('/novos-produtos-erro-generico', async (req, res) => {
   const erros = await validar(req.body)
   if (Object.keys(erros).length > 0) {

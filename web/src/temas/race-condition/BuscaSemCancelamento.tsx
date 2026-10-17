@@ -11,7 +11,7 @@ export function BuscaSemCancelamento() {
   const [resultado, setResultado] = useState<Resultado>()
 
   // Várias requisições ficam no ar ao mesmo tempo.
-  // A que responder por último ganha — e nem sempre é a mais recente.
+  // A que responder por último ganha - e nem sempre é a mais recente.
   useEffect(() => {
     buscarComDemora(busca).then((produtos) => {
       setResultado({ busca, produtos })

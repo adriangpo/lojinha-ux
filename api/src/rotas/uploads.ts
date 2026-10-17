@@ -52,7 +52,7 @@ function etapaDe(progresso: number) {
   return 'Pronto'
 }
 
-// GET /api/uploads/:id — usado pelo polling: o front pergunta, a API responde o que tem agora.
+// GET /api/uploads/:id - usado pelo polling: o front pergunta, a API responde o que tem agora.
 rotasDeUploads.get('/uploads/:id', async (req, res) => {
   const [status] = await sql<Status>('SELECT id, progresso, etapa FROM uploads WHERE id = $1', [Number(req.params.id)])
   res.json(status)
@@ -73,7 +73,7 @@ ouvinte.on('notification', (aviso) => {
 await ouvinte.connect()
 await ouvinte.query('LISTEN uploads')
 
-// GET /api/uploads/:id/eventos — SSE: a API avisa o front a cada NOTIFY do Postgres.
+// GET /api/uploads/:id/eventos - SSE: a API avisa o front a cada NOTIFY do Postgres.
 // Registrada em servidor.ts fora da latência simulada: a conexão fica aberta o tempo todo.
 export async function transmitirProgresso(req: Request, res: Response) {
   const id = Number(req.params.id)

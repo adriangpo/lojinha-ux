@@ -1,5 +1,5 @@
 // Infraestrutura do monitor: avisa a aba /monitor de tudo o que acontece na API e no banco.
-// Não faz parte das demos — as rotas não precisam saber que estão sendo observadas.
+// Não faz parte das demos - as rotas não precisam saber que estão sendo observadas.
 import { AsyncLocalStorage } from 'node:async_hooks'
 import { randomUUID } from 'node:crypto'
 import { EventEmitter } from 'node:events'
@@ -36,7 +36,7 @@ export function idDaRequisicaoAtual() {
   return requisicaoAtual.getStore()
 }
 
-// GET /api/monitor/eventos — a aba do monitor recebe todos os eventos por SSE.
+// GET /api/monitor/eventos - a aba do monitor recebe todos os eventos por SSE.
 export function transmitirEventos(req: Request, res: Response) {
   res.writeHead(200, {
     'Content-Type': 'text/event-stream',
