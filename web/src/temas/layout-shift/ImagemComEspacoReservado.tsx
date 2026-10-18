@@ -6,6 +6,9 @@ import { buscarProdutos, formatarPreco, type Produto } from '../../lib/produtos'
 export function ImagemComEspacoReservado() {
   const [produtos, setProdutos] = useState<Produto[]>([])
   const [clicado, setClicado] = useState<string>()
+  // O navegador guarda na memória as imagens que a aba já mostrou (mesmo com no-store).
+  // O ?visita= muda cada vez que a tela abre: as fotos vêm da API de novo, como numa primeira visita.
+  const [visita] = useState(() => Date.now())
 
   useEffect(() => {
     buscarProdutos({ categoria: 'Eletrônicos' }).then((dados) => setProdutos(dados.slice(0, 6)))
@@ -27,7 +30,7 @@ export function ImagemComEspacoReservado() {
                 o navegador já reserva o espaço e nada se mexe quando ela carrega.
                 (Mesmo efeito: style={{ aspectRatio: '4 / 3' }}.) */}
             <img
-              src={`/api/imagens/${produto.id}`}
+              src={`/api/imagens/${produto.id}?visita=${visita}`}
               alt={produto.nome}
               width={640}
               height={480}

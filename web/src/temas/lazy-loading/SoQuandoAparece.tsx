@@ -1,4 +1,5 @@
 import { SimpleGrid, Stack } from '@mantine/core'
+import { useState } from 'react'
 import { ContadorDeDownloads } from './ContadorDeDownloads'
 
 const FOTOS = Array.from({ length: 200 }, (_, indice) => indice + 1)
@@ -8,6 +9,10 @@ const FOTOS = Array.from({ length: 200 }, (_, indice) => indice + 1)
 // width e height são obrigatórios aqui: sem eles, todas as imagens começam com altura 0,
 // cabem juntas na tela e o navegador baixa todas.
 export function SoQuandoAparece() {
+  // O navegador guarda na memória as imagens que a aba já mostrou (mesmo com no-store).
+  // O ?visita= muda cada vez que a tela abre: as fotos vêm da API de novo, como numa primeira visita.
+  const [visita] = useState(() => Date.now())
+
   return (
     <Stack>
       <ContadorDeDownloads />
@@ -15,7 +20,7 @@ export function SoQuandoAparece() {
         {FOTOS.map((id) => (
           <img
             key={id}
-            src={`/api/imagens/${id}`}
+            src={`/api/imagens/${id}?visita=${visita}`}
             loading="lazy"
             width={640}
             height={480}
