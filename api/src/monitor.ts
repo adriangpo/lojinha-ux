@@ -58,7 +58,8 @@ export function rastrearRequisicoes(req: Request, res: Response, next: NextFunct
     id,
     pai: req.get('x-request-id'),
     faixa: 'api',
-    rotulo: `${req.method} ${req.originalUrl.replace(/^\/api/, '')}`,
+    // Sem o ?visita= das imagens, que só serve para fugir do cache e deixaria o rótulo comprido.
+    rotulo: `${req.method} ${req.originalUrl.replace(/^\/api/, '').replace(/\?visita=\d+$/, '')}`,
     em: Date.now(),
     requisicao: { cabecalhos: textos(req.headers), corpo: req.body && JSON.stringify(req.body) },
   })
