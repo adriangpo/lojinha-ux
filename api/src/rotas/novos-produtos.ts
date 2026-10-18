@@ -11,21 +11,23 @@ const CATEGORIAS = ['Eletrônicos', 'Livros', 'Casa', 'Esporte', 'Games']
 
 export const rotasDeNovosProdutos = Router()
 
-// Devolve um erro por campo: { nome: 'Já existe um produto com esse nome' }.
-// Vazio = tudo certo.
-async function validar({ nome, categoria, precoCentavos }: Cadastro) {
-  const erros: Record<string, string> = {}
+// Formato de erro do Agiliza Aí: { errors: [{ code, message, field }] }.
+// O code é único e estável: o front decide o texto a partir dele (dá até para usar como chave de tradução).
+// O field é o nome do campo no corpo do pedido. Lista vazia = tudo certo.
+type ErroDeCampo = { code: string; message: string; field: string }
+
+function validar({ nome, categoria, precoCentavos }: Cadastro) {
+  const erros: ErroDeCampo[] = []
 
   if (typeof nome !== 'string' || nome.trim() === '') {
-    erros.nome = 'Informe o nome do produto'
-  } else if (await nomeEmUso(nome)) {
-    // Isso só o servidor sabe: o front não tem a lista de todos os produtos.
-    erros.nome = `Já existe um produto chamado “${nome.trim()}”`
+    erros.push({ code: 'PRODUCT_NAME_REQUIRED', message: 'Informe o nome do produto', field: 'nome' })
   }
-
-  if (!CATEGORIAS.includes(categoria)) erros.categoria = 'Escolha uma das categorias'
-
-  if (!Number.isInteger(precoCentavos) || precoCentavos <= 0) erros.preco = 'Informe um preço maior que zero'
+  if (!CATEGORIAS.includes(categoria)) {
+    erros.push({ code: 'PRODUCT_CATEGORY_INVALID', message: 'Escolha uma das categorias', field: 'categoria' })
+  }
+  if (!Number.isInteger(precoCentavos) || precoCentavos <= 0) {
+    erros.push({ code: 'PRODUCT_PRICE_INVALID', message: 'Informe um preço maior que zero', field: 'precoCentavos' })
+  }
 
   return erros
 }
@@ -51,8 +53,7 @@ async function salvar({ nome, categoria, precoCentavos }: Cadastro) {
 // Versão ruim: a API sabe exatamente o que está errado, mas joga a informação fora.
 // Status 500 diz "o servidor quebrou" - e não quebrou, o dado é que veio errado.
 rotasDeNovosProdutos.post('/novos-produtos-erro-generico', async (req, res) => {
-  const erros = await validar(req.body)
-  if (Object.keys(erros).length > 0) {
+  if (validar(req.body).length > 0 || (await nomeEmUso(req.body.nome))) {
     res.status(500).json({ erro: 'invalid' })
     return
   }
@@ -60,12 +61,21 @@ rotasDeNovosProdutos.post('/novos-produtos-erro-generico', async (req, res) => {
   res.status(201).json(await salvar(req.body))
 })
 
-// Versão boa: 422 (entendi o pedido, mas os dados não passam) e um erro por campo,
-// para o front colocar cada mensagem embaixo do campo certo.
+// Versão boa: o status diz o tipo do problema e cada erro tem code, mensagem e campo.
 rotasDeNovosProdutos.post('/novos-produtos', async (req, res) => {
-  const erros = await validar(req.body)
-  if (Object.keys(erros).length > 0) {
-    res.status(422).json({ erro: 'Confira os campos destacados', campos: erros })
+  // 422: entendi o pedido, mas os dados não passam.
+  const erros = validar(req.body)
+  if (erros.length > 0) {
+    res.status(422).json({ errors: erros })
+    return
+  }
+
+  // 409: os dados estão certos, mas batem com o que já existe.
+  // Isso só o servidor sabe: o front não tem a lista de todos os produtos.
+  if (await nomeEmUso(req.body.nome)) {
+    res.status(409).json({
+      errors: [{ code: 'PRODUCT_NAME_TAKEN', message: 'Já existe um produto com esse nome', field: 'nome' }],
+    })
     return
   }
 
