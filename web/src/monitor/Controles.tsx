@@ -12,6 +12,8 @@ const LATENCIAS = [
   { label: '1s', value: '1000' },
   { label: '3s', value: '3000' },
   { label: 'Aleatória', value: 'aleatoria' },
+  // Tema Timeouts: uma API que parece travada.
+  { label: 'Travada (30s)', value: '30000' },
 ]
 
 const TAXAS_DE_ERRO = [

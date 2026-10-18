@@ -73,6 +73,39 @@ ouvinte.on('notification', (aviso) => {
 await ouvinte.connect()
 await ouvinte.query('LISTEN uploads')
 
+// Espera o próximo NOTIFY deste upload, por no máximo `ms`. Sem novidade no prazo, devolve undefined.
+function proximoAviso(id: number, ms: number) {
+  return new Promise<Status | undefined>((resolver) => {
+    const aoAvisar = (status: Status) => {
+      if (status.id === id) terminar(status)
+    }
+    const prazo = setTimeout(() => terminar(undefined), ms)
+    function terminar(status: Status | undefined) {
+      clearTimeout(prazo)
+      avisos.off('progresso', aoAvisar)
+      resolver(status)
+    }
+    avisos.on('progresso', aoAvisar)
+  })
+}
+
+// GET /api/uploads/:id/novidades?depoisDe=40 - long polling: a API segura a resposta
+// até o progresso mudar (ou até 30s, devolvendo o mesmo valor). Respondeu, o front pergunta de novo.
+rotasDeUploads.get('/uploads/:id/novidades', async (req, res) => {
+  const id = Number(req.params.id)
+  // Começa a escutar antes de consultar, para nenhum aviso escapar entre uma coisa e outra.
+  const aviso = proximoAviso(id, 30_000)
+
+  // Já mudou desde a última resposta? Então responde na hora.
+  const [atual] = await sql<Status>('SELECT id, progresso, etapa FROM uploads WHERE id = $1', [id])
+  if (atual.progresso !== Number(req.query.depoisDe)) {
+    res.json(atual)
+    return
+  }
+
+  res.json((await aviso) ?? atual)
+})
+
 // GET /api/uploads/:id/eventos - SSE: a API avisa o front a cada NOTIFY do Postgres.
 // Registrada em servidor.ts fora da latência simulada: a conexão fica aberta o tempo todo.
 export async function transmitirProgresso(req: Request, res: Response) {

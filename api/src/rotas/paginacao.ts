@@ -7,6 +7,11 @@ const POR_PAGINA = 10
 
 export const rotasDePaginacao = Router()
 
+// GET /api/feed/tudo - sem paginação: todas as publicações, mesmo que a tela só mostre as primeiras.
+rotasDePaginacao.get('/feed/tudo', async (_req, res) => {
+  res.json(await sql<Publicacao>('SELECT id, texto FROM publicacoes ORDER BY id DESC'))
+})
+
 // GET /api/feed/offset?pagina=2 - "pula os 10 primeiros e me dá os próximos 10".
 // Se alguém publicar no meio do caminho, tudo anda uma posição e um item aparece repetido.
 rotasDePaginacao.get('/feed/offset', async (req, res) => {

@@ -3,6 +3,7 @@ import { prepararFotos } from './armazenamento'
 import { rotasDeControle, simularMundoReal } from './controle'
 import { rastrearRequisicoes, transmitirEventos } from './monitor'
 import { rotasDeCacheHttp } from './rotas/cache-http'
+import { rotasDeCarrinho } from './rotas/carrinho'
 import { rotasDeCupons } from './rotas/cupons'
 import { rotasDeFavoritos } from './rotas/favoritos'
 import { rotasDeImagens } from './rotas/imagens'
@@ -43,6 +44,7 @@ app.use('/api', rotasDeSessao)
 app.use('/api', rotasDeUploads)
 app.use('/api', rotasDeNovosProdutos)
 app.use('/api', rotasDeFavoritos)
+app.use('/api', rotasDeCarrinho)
 
 app.use((erro: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error(erro)

@@ -1,8 +1,8 @@
 import type { ComponentType } from 'react'
 import { BuscaComDebounce } from './temas/debounce/BuscaComDebounce'
 import { BuscaSemDebounce } from './temas/debounce/BuscaSemDebounce'
-import { BuscaComCancelamento } from './temas/race-condition/BuscaComCancelamento'
-import { BuscaSemCancelamento } from './temas/race-condition/BuscaSemCancelamento'
+import { CliquesComCancelamento } from './temas/race-condition/CliquesComCancelamento'
+import { CliquesSemCancelamento } from './temas/race-condition/CliquesSemCancelamento'
 import { CacheHttp } from './temas/cache/CacheHttp'
 import { CacheNaMao } from './temas/cache/CacheNaMao'
 import { ComTanstackQuery } from './temas/cache/ComTanstackQuery'
@@ -46,6 +46,16 @@ import { LimiteSemExplicacao } from './temas/rate-limiting/LimiteSemExplicacao'
 import { SemLimite } from './temas/rate-limiting/SemLimite'
 import { ComModalDeLogin } from './temas/sessao-expirada/ComModalDeLogin'
 import { PerdeOFormulario } from './temas/sessao-expirada/PerdeOFormulario'
+import { BotaoSempreHabilitado } from './temas/formularios/BotaoSempreHabilitado'
+import { AlertaQueBloqueia } from './temas/feedback-de-sucesso/AlertaQueBloqueia'
+import { ComToast } from './temas/feedback-de-sucesso/ComToast'
+import { NadaAcontece } from './temas/feedback-de-sucesso/NadaAcontece'
+import { ComLongPolling } from './temas/upload/ComLongPolling'
+import { ComTimeout } from './temas/timeouts/ComTimeout'
+import { EsperaParaSempre } from './temas/timeouts/EsperaParaSempre'
+import { FilaOffline } from './temas/offline/FilaOffline'
+import { PerdeAAcao } from './temas/offline/PerdeAAcao'
+import { SemPaginacao } from './temas/paginacao/SemPaginacao'
 
 export type Etiqueta = 'Frontend' | 'API' | 'Frontend + API'
 
@@ -71,7 +81,9 @@ export const TEMAS: Tema[] = [
     bloco: ANTES,
     versoes: [
       { nome: 'Só no servidor', componente: CadastroSoNoServidor },
-      { nome: 'Validação no front', componente: CadastroComValidacao },
+      // As duas próximas são o debate: cada uma é uma corrente, e a turma vota.
+      { nome: 'Botão sempre habilitado', componente: BotaoSempreHabilitado },
+      { nome: 'Botão desabilitado', componente: CadastroComValidacao },
     ],
   },
   {
@@ -143,8 +155,8 @@ export const TEMAS: Tema[] = [
     etiqueta: 'Frontend',
     bloco: ESPERA,
     versoes: [
-      { nome: 'Sem cancelamento', componente: BuscaSemCancelamento },
-      { nome: 'Com AbortController', componente: BuscaComCancelamento },
+      { nome: 'Sem cancelamento', componente: CliquesSemCancelamento },
+      { nome: 'Com AbortController', componente: CliquesComCancelamento },
     ],
   },
   {
@@ -158,26 +170,37 @@ export const TEMAS: Tema[] = [
     ],
   },
   {
+    slug: 'feedback-de-sucesso',
+    titulo: 'Feedback de sucesso',
+    etiqueta: 'Frontend',
+    bloco: ESPERA,
+    versoes: [
+      { nome: 'Nada acontece', componente: NadaAcontece },
+      { nome: 'Alerta que bloqueia', componente: AlertaQueBloqueia },
+      { nome: 'Toast', componente: ComToast },
+    ],
+  },
+  {
     slug: 'upload',
     titulo: 'Upload com progresso e tempo real',
     etiqueta: 'Frontend + API',
     bloco: ESPERA,
     versoes: [
       { nome: 'Sem progresso', componente: SemProgresso },
-      { nome: 'Polling', componente: ComPolling },
+      { nome: 'Short polling', componente: ComPolling },
+      { nome: 'Long polling', componente: ComLongPolling },
       { nome: 'SSE', componente: ComSse },
     ],
   },
 
   {
-    slug: 'clique-duplo',
-    titulo: 'Clique duplo e idempotência',
+    slug: 'timeouts',
+    titulo: 'Timeouts',
     etiqueta: 'Frontend + API',
     bloco: ERRO,
     versoes: [
-      { nome: 'Sem proteção', componente: SemProtecao },
-      { nome: 'Botão travado', componente: BotaoTravado },
-      { nome: 'Chave de idempotência', componente: ComChaveDeIdempotencia },
+      { nome: 'Espera para sempre', componente: EsperaParaSempre },
+      { nome: 'Com timeout', componente: ComTimeout },
     ],
   },
   {
@@ -189,6 +212,17 @@ export const TEMAS: Tema[] = [
       { nome: 'Sem retry', componente: SemRetry },
       { nome: 'Retry sem parar', componente: RetrySemParar },
       { nome: 'Exponential backoff', componente: ComBackoff },
+    ],
+  },
+  {
+    slug: 'clique-duplo',
+    titulo: 'Clique duplo e idempotência',
+    etiqueta: 'Frontend + API',
+    bloco: ERRO,
+    versoes: [
+      { nome: 'Sem proteção', componente: SemProtecao },
+      { nome: 'Botão travado', componente: BotaoTravado },
+      { nome: 'Chave de idempotência', componente: ComChaveDeIdempotencia },
     ],
   },
   {
@@ -210,6 +244,16 @@ export const TEMAS: Tema[] = [
     versoes: [
       { nome: 'Perde o formulário', componente: PerdeOFormulario },
       { nome: 'Modal de login', componente: ComModalDeLogin },
+    ],
+  },
+  {
+    slug: 'offline',
+    titulo: 'Offline e conexão instável',
+    etiqueta: 'Frontend + API',
+    bloco: ERRO,
+    versoes: [
+      { nome: 'Perde a ação', componente: PerdeAAcao },
+      { nome: 'Fila offline', componente: FilaOffline },
     ],
   },
 
@@ -261,6 +305,7 @@ export const TEMAS: Tema[] = [
     etiqueta: 'Frontend + API',
     bloco: RAPIDEZ,
     versoes: [
+      { nome: 'Sem paginação', componente: SemPaginacao },
       { nome: 'Páginas numeradas', componente: PaginasNumeradas },
       { nome: 'Infinito com offset', componente: InfinitoComOffset },
       { nome: 'Infinito com cursor', componente: InfinitoComCursor },
