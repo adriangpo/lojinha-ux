@@ -1,5 +1,7 @@
 import '@mantine/core/styles.css'
+import '@mantine/notifications/styles.css'
 import { createTheme, MantineProvider } from '@mantine/core'
+import { Notifications } from '@mantine/notifications'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
@@ -26,6 +28,8 @@ const tema = createTheme({
 // e o monitor mostraria requisições duplicadas que não existem em produção.
 createRoot(document.getElementById('root')!).render(
   <MantineProvider theme={tema}>
+    {/* Onde os toasts aparecem (tema Feedback de sucesso). */}
+    <Notifications position="bottom-center" />
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <App />

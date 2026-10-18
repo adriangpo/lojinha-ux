@@ -1,6 +1,6 @@
 # Lojinha UX
 
-Aplicação de demonstração do mini curso **Do Clique à API: UX de Verdade**: 19 temas de experiência do usuário vistos dos dois lados, frontend e API, cada um na versão ruim e na versão boa.
+Aplicação de demonstração do mini curso **Do Clique à API: UX de Verdade**: 22 temas de experiência do usuário vistos dos dois lados, frontend e API, cada um na versão ruim e na versão boa.
 
 Uma lojinha com **uma página por tema**. Cada página tem as versões do tema (ruim → boa) num seletor no canto superior direito, e cada versão é um arquivo próprio, curto, para explicar linha por linha.
 
@@ -60,7 +60,7 @@ O que é **infraestrutura** (não precisa mostrar): `monitor`, `controle`, `comp
 - **Agrupar iguais:** junta requisições iguais da mesma leva ("200× GET /imagens/:id"). **Esconder:** filtra pelo texto (ex.: "imagens").
 - **Fixar para comparar:** guarda a linha do tempo atual (com placar) e limpa. Rode a versão ruim, fixe, rode a boa: as duas ficam uma embaixo da outra. Dá para renomear e remover.
 - **Sequência:** setas entre as partes, em ordem.
-- **Latência:** Nenhuma, 300ms, 1s, 3s ou Aleatória (200ms a 2s, para race condition).
+- **Latência:** Nenhuma, 300ms, 1s, 3s, Aleatória (200ms a 2s, para layout shift) ou Travada (30s, para timeouts).
 - **Taxa de erro:** 0%, 25%, 50% ou 100% (a API responde 503).
 - **Sessão:** "Expirar sessão agora" (tema Sessão expirada).
 
@@ -70,35 +70,38 @@ As fotos do MinIO passam pelo proxy do Vite (`/fotos`), para virem da mesma orig
 
 ## Status dos temas
 
-Todos os 19 temas estão prontos. Na tabela, o que testar e como deixar o painel do monitor:
+Na ordem da apresentação, todos os 22 temas estão prontos. Na tabela, o que testar e como deixar o painel do monitor:
 
 | Tema | Versões | Como demonstrar |
 |---|---|---|
-| Formulários e validação | Só no servidor / Validação no front | Clicar em Cadastrar com campos faltando |
+| Formulários e validação | Só no servidor / Botão sempre habilitado / Botão desabilitado | Clicar em Cadastrar com campos faltando; nas duas últimas, a turma vota |
 | Erros úteis | Erro genérico / 422 com erro por campo | Cadastrar "Teclado mecânico" (nome já em uso) |
 | URL como estado | Filtros no useState / Filtros na URL | Filtrar, dar F5, copiar o link |
 | Estados da tela | Tela branca / Quatro estados | Erro 100%; depois buscar "xyz" |
 | Skeleton Loading | Spinner / Skeleton | Latência 1s |
 | Layout shift | Imagem sem tamanho / Espaço reservado | Latência aleatória; tentar clicar em Comprar |
 | Debounce e Throttle | Sem debounce / Com debounce / Throttle no scroll | Digitar; rolar a página |
-| Race conditions | Sem cancelamento / Com AbortController | Latência aleatória |
+| Race conditions | Sem cancelamento / Com AbortController | Latência Nenhuma; clicar em Eletrônicos (2s) e logo em Casa (0,3s) |
 | Optimistic UI | Espera a API / Muda na hora | Latência 1s; depois erro 100% |
-| Upload | Sem progresso / Polling / SSE | Arquivo de ~10 MB |
-| Clique duplo e idempotência | Sem proteção / Botão travado / Chave de idempotência | Clicar várias vezes em Comprar |
+| Feedback de sucesso | Nada acontece / Alerta que bloqueia / Toast | Adicionar ao carrinho |
+| Upload | Sem progresso / Short polling / Long polling / SSE | Arquivo de ~10 MB; fixar cada versão no monitor e comparar as requests |
+| Timeouts | Sem limite / Com timeout | Latência Travada |
 | Retries e backoff | Sem retry / Retry sem parar / Exponential backoff | Erro 50% ou 100% |
+| Clique duplo e idempotência | Sem proteção / Botão travado / Chave de idempotência | Clicar várias vezes em Comprar |
 | Rate Limiting | Sem limite / 429 sem explicação / Com Retry-After | Aplicar o cupom várias vezes (limite: 5 em 10s) |
 | Sessão expirada | Perde o formulário / Modal de login | Preencher, "Expirar sessão agora" no monitor, Salvar |
+| Offline e conexão instável | Perde a ação / Fila offline | DevTools → Network → Offline; favoritar; voltar para Online |
 | Caching | Sem cache / Cache na mão / TanStack Query / Cache HTTP | Trocar de categoria e voltar; no Cache HTTP, a API nem aparece no monitor por 10s |
 | Imagens com signed URL | URL nova a cada vez / URL reaproveitada | Dar F5 com a aba Network aberta |
 | Lazy Loading | Tudo de uma vez / loading="lazy" | Contador de imagens e MB no topo |
 | N+1 requests | Um endpoint por recurso / Um endpoint por tela | 15 requests vs 1 no monitor |
-| Pagination vs Infinite Scroll | Páginas numeradas / Infinito com offset / Infinito com cursor | "Simular: alguém publicou agora" e rolar: o offset repete um item |
+| Pagination vs Infinite Scroll | Sem paginação / Páginas numeradas / Infinito com offset / Infinito com cursor | Sem paginação: ver o tamanho da resposta no monitor. Depois, "Simular: alguém publicou agora" e rolar: o offset repete um item |
 
 ## Stack
 
 | Parte | Escolha |
 |---|---|
-| Frontend | React + Vite + TypeScript + Mantine + TanStack Query + React Router |
+| Frontend | React + Vite + TypeScript + Mantine (+ notifications) + TanStack Query + React Router |
 | API | Node + Express 5 + TypeScript |
 | Banco | Postgres 16 (Docker) |
 | Imagens | MinIO local (S3), fotos geradas pela API com sharp |

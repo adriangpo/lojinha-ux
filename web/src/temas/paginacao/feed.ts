@@ -3,6 +3,10 @@ import { monitor } from '../../lib/monitor'
 
 export type Publicacao = { id: number; texto: string }
 
+export function buscarTudo() {
+  return api<Publicacao[]>('/feed/tudo')
+}
+
 export function buscarPorPagina(pagina: number) {
   return api<{ itens: Publicacao[]; totalDePaginas: number }>(`/feed/offset?pagina=${pagina}`)
 }
