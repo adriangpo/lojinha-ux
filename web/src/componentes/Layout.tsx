@@ -1,5 +1,5 @@
 import { AppShell, Burger, Button, Group, NavLink, ScrollArea, Text, Title } from '@mantine/core'
-import { useDisclosure } from '@mantine/hooks'
+import { useDisclosure, useWindowEvent } from '@mantine/hooks'
 import { useEffect, useState } from 'react'
 import { NavLink as LinkDaRota, Outlet } from 'react-router'
 import { observarNavegador } from '../lib/monitor'
@@ -14,12 +14,16 @@ export function Layout() {
   const [consoleAberto, { toggle: alternarConsole, close: fecharConsole }] = useDisclosure(true)
   const [larguraDoConsole, setLarguraDoConsole] = useState(480)
   const [arrastando, setArrastando] = useState(false)
+  // Se a janela encolher, o console encolhe junto em vez de passar da borda.
+  useWindowEvent('resize', () => setLarguraDoConsole((largura) => Math.min(largura, window.innerWidth * 0.7)))
 
   return (
     <AppShell
       header={{ height: 60 }}
       navbar={{ width: 300, breakpoint: 'sm', collapsed: { desktop: !menuAberto, mobile: !menuAberto } }}
-      aside={{ width: larguraDoConsole, breakpoint: 'md', collapsed: { desktop: !consoleAberto, mobile: true } }}
+      // breakpoint 0: o console nunca entra no modo "celular" (que o escondia em telas estreitas).
+      // Aberto, ele fica fixo do lado direito em qualquer largura; a borda arrastável ajusta o tamanho.
+      aside={{ width: larguraDoConsole, breakpoint: 0, collapsed: { desktop: !consoleAberto } }}
       // Sem animação enquanto arrasta, senão o painel fica atrás do mouse.
       transitionDuration={arrastando ? 0 : 200}
       padding="lg"
