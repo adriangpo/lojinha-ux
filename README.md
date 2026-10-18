@@ -74,8 +74,8 @@ Na ordem da apresentação, todos os 22 temas estão prontos. Na tabela, o que t
 
 | Tema | Versões | Como demonstrar |
 |---|---|---|
-| Formulários e validação | Só no servidor / Botão sempre habilitado / Botão desabilitado | Clicar em Cadastrar com campos faltando; nas duas últimas, a turma vota |
-| Erros úteis | Erro genérico / 422 com erro por campo | Cadastrar "Teclado mecânico" (nome já em uso) |
+| Formulários e validação | Só no servidor / Botão sempre habilitado / Erro ao sair do campo | Clicar em Cadastrar com campos faltando. Na última: abrir a página (nenhum erro), entrar e sair de um campo vazio (só ele mostra erro), clicar no botão cinza (todos os erros, foco no primeiro). A turma vota antes da última |
+| Erros úteis | Erro genérico / Erro com code por campo | Cadastrar vazio (`422`, três erros com code) e depois "Teclado mecânico" (nome já em uso, `409 PRODUCT_NAME_TAKEN`); abrir a resposta no inspetor do monitor |
 | URL como estado | Filtros no useState / Filtros na URL | Filtrar, dar F5, copiar o link |
 | Estados da tela | Tela branca / Quatro estados | Erro 100%; depois buscar "xyz" |
 | Skeleton Loading | Spinner / Skeleton | Latência 1s |

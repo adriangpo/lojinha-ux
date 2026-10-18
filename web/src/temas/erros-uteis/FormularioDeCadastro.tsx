@@ -12,6 +12,7 @@ export type NovoProduto = {
 type Props = {
   aoEnviar: (produto: NovoProduto) => Promise<void>
   aviso?: { cor: string; texto: string }
+  // Mensagem por campo, com o nome do campo no corpo do pedido: { nome: '...', precoCentavos: '...' }.
   erros: Record<string, string>
 }
 
@@ -46,7 +47,7 @@ export function FormularioDeCadastro({ aoEnviar, aviso, erros }: Props) {
           decimalScale={2}
           value={preco}
           onChange={setPreco}
-          error={erros.preco}
+          error={erros.precoCentavos}
         />
 
         <Button type="submit" loading={enviando}>

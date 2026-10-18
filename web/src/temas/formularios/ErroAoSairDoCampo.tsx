@@ -1,21 +1,31 @@
-import { Alert, Button, Group, NumberInput, Select, Stack, Text, TextInput } from '@mantine/core'
-import { useState, type FormEvent } from 'react'
+import { Alert, Button, NumberInput, Select, Stack, TextInput } from '@mantine/core'
+import { useRef, useState, type FormEvent } from 'react'
 import { api } from '../../lib/api'
 import { monitor } from '../../lib/monitor'
 import { CATEGORIAS } from '../../lib/produtos'
 
 type Campo = 'nome' | 'categoria' | 'preco'
 
-const ROTULOS: Record<Campo, string> = { nome: 'Nome', categoria: 'Categoria', preco: 'Preço' }
+// Altura de um campo já com a mensagem de erro. Reservar esse espaço evita que o erro
+// empurre o que está embaixo bem na hora do clique (e o clique erre o alvo).
+const ALTURA_COM_ERRO = 81
 
-export function CadastroComValidacao() {
+// O melhor das duas correntes: o botão parece desabilitado (avisa que falta algo),
+// mas o clique ainda funciona e explica o quê. E nenhum erro aparece antes da hora.
+export function ErroAoSairDoCampo() {
   const [nome, setNome] = useState('')
   const [categoria, setCategoria] = useState<string | null>(null)
   const [preco, setPreco] = useState<string | number>('')
-  // Campos por onde o usuário já passou. Só eles mostram erro: ninguém quer bronca antes de começar.
+  // Campos em que o usuário entrou e saiu. Só eles mostram erro: quem ainda não chegou no campo não leva bronca.
   const [tocados, setTocados] = useState<Campo[]>([])
   const [enviando, setEnviando] = useState(false)
   const [aviso, setAviso] = useState<{ cor: string; texto: string }>()
+  // Para levar o foco até o primeiro campo com erro.
+  const refs = {
+    nome: useRef<HTMLInputElement>(null),
+    categoria: useRef<HTMLInputElement>(null),
+    preco: useRef<HTMLInputElement>(null),
+  }
 
   // Os erros saem dos valores a cada render: não precisam de estado próprio.
   const erros: Partial<Record<Campo, string>> = {}
@@ -36,10 +46,11 @@ export function CadastroComValidacao() {
     // Durante o envio, um segundo clique não faz nada (nada de cadastro duplicado).
     if (enviando) return
 
-    // Clicou com campo faltando: em vez de ignorar o clique, mostra o que falta.
+    // Clicou no botão "desabilitado": não envia, mas mostra todos os erros e leva ao primeiro.
     if (pendentes.length > 0) {
       setTocados(['nome', 'categoria', 'preco'])
-      monitor.tela('campos pendentes destacados')
+      refs[pendentes[0]].current?.focus()
+      monitor.tela('erros em todos os campos, foco no primeiro')
       return
     }
 
@@ -72,6 +83,8 @@ export function CadastroComValidacao() {
         {aviso && <Alert color={aviso.cor}>{aviso.texto}</Alert>}
 
         <TextInput
+          ref={refs.nome}
+          mih={ALTURA_COM_ERRO}
           label="Nome"
           withAsterisk
           value={nome}
@@ -80,6 +93,8 @@ export function CadastroComValidacao() {
           error={erroDo('nome')}
         />
         <Select
+          ref={refs.categoria}
+          mih={ALTURA_COM_ERRO}
           label="Categoria"
           withAsterisk
           data={CATEGORIAS}
@@ -89,6 +104,8 @@ export function CadastroComValidacao() {
           error={erroDo('categoria')}
         />
         <NumberInput
+          ref={refs.preco}
+          mih={ALTURA_COM_ERRO}
           label="Preço"
           withAsterisk
           prefix="R$ "
@@ -101,17 +118,11 @@ export function CadastroComValidacao() {
           error={erroDo('preco')}
         />
 
-        <Group>
-          {/* aria-disabled em vez de disabled: o botão continua no Tab e o clique ainda explica o que falta. */}
-          <Button type="submit" aria-disabled={bloqueado} data-disabled={bloqueado || undefined}>
-            {enviando ? 'Enviando…' : 'Cadastrar'}
-          </Button>
-          {pendentes.length > 0 && (
-            <Text size="sm" c="dimmed">
-              Falta preencher: {pendentes.map((campo) => ROTULOS[campo]).join(', ')}
-            </Text>
-          )}
-        </Group>
+        {/* aria-disabled em vez de disabled: com disabled, o clique nem chega aqui e não daria para explicar o que falta.
+            data-disabled só pinta o botão de cinza. */}
+        <Button type="submit" aria-disabled={bloqueado} data-disabled={bloqueado || undefined}>
+          {enviando ? 'Enviando…' : 'Cadastrar'}
+        </Button>
       </Stack>
     </form>
   )

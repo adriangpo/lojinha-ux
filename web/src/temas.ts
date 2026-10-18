@@ -16,7 +16,7 @@ import { InfinitoComOffset } from './temas/paginacao/InfinitoComOffset'
 import { PaginasNumeradas } from './temas/paginacao/PaginasNumeradas'
 import { UmEndpoint } from './temas/n-mais-1/UmEndpoint'
 import { VariasRequisicoes } from './temas/n-mais-1/VariasRequisicoes'
-import { CadastroComValidacao } from './temas/formularios/CadastroComValidacao'
+import { ErroAoSairDoCampo } from './temas/formularios/ErroAoSairDoCampo'
 import { CadastroSoNoServidor } from './temas/formularios/CadastroSoNoServidor'
 import { ErroGenerico } from './temas/erros-uteis/ErroGenerico'
 import { ErroPorCampo } from './temas/erros-uteis/ErroPorCampo'
@@ -81,9 +81,9 @@ export const TEMAS: Tema[] = [
     bloco: ANTES,
     versoes: [
       { nome: 'Só no servidor', componente: CadastroSoNoServidor },
-      // As duas próximas são o debate: cada uma é uma corrente, e a turma vota.
+      // As duas próximas são o debate: a turma vota antes de ver a última, que junta o melhor das duas.
       { nome: 'Botão sempre habilitado', componente: BotaoSempreHabilitado },
-      { nome: 'Botão desabilitado', componente: CadastroComValidacao },
+      { nome: 'Erro ao sair do campo', componente: ErroAoSairDoCampo },
     ],
   },
   {
@@ -93,7 +93,7 @@ export const TEMAS: Tema[] = [
     bloco: ANTES,
     versoes: [
       { nome: 'Erro genérico', componente: ErroGenerico },
-      { nome: '422 com erro por campo', componente: ErroPorCampo },
+      { nome: 'Erro com code por campo', componente: ErroPorCampo },
     ],
   },
   {

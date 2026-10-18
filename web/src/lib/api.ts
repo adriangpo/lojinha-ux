@@ -1,11 +1,14 @@
 import { detalhesDaResposta, monitor } from './monitor'
 
+// Um erro da lista { errors: [...] } que algumas rotas mandam (tema Erros úteis).
+export type ErroDeCampo = { code: string; message: string; field: string }
+
 export class ErroDaApi extends Error {
   constructor(
     public status: number,
     mensagem: string,
-    // Erro por campo, quando a API manda: { nome: 'Já existe um produto com esse nome' }.
-    public campos?: Record<string, string>,
+    // Erros por campo, quando a API manda: [{ code: 'PRODUCT_NAME_TAKEN', message: '...', field: 'nome' }].
+    public erros?: ErroDeCampo[],
     // Cabeçalhos da resposta, para ler coisas como o Retry-After de um 429.
     public cabecalhos?: Headers,
   ) {
@@ -46,7 +49,8 @@ export async function api<T>(caminho: string, { method = 'GET', corpo, signal, h
 
   const dados = await resposta.json()
   if (!resposta.ok) {
-    throw new ErroDaApi(resposta.status, dados.erro ?? 'Erro inesperado', dados.campos, resposta.headers)
+    const mensagem = dados.erro ?? dados.errors?.[0]?.message ?? 'Erro inesperado'
+    throw new ErroDaApi(resposta.status, mensagem, dados.errors, resposta.headers)
   }
   return dados as T
 }
