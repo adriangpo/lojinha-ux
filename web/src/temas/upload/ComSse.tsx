@@ -41,7 +41,7 @@ export function ComSse() {
     const fonte = new EventSource(`/api/uploads/${idDoUpload}/eventos`)
     fonte.onmessage = (mensagem) => {
       const atual: StatusDoUpload = JSON.parse(mensagem.data)
-      monitor.aviso(`${atual.progresso}%`, 'api', 'navegador', idNoMonitor)
+      monitor.aviso(`mensagem SSE: ${atual.progresso}%`, 'api', 'navegador', idNoMonitor, mensagem.data)
       setStatus(atual)
       setAvisos((n) => n + 1)
       // Terminou: fecha a conexão. Sem isso, o EventSource reconectaria sozinho.

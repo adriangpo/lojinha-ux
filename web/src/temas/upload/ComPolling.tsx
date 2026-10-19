@@ -1,26 +1,27 @@
-import { Alert, Stack, Text } from '@mantine/core'
+import { Alert, Stack } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api'
 import { monitor } from '../../lib/monitor'
 import { BarraDaFase } from './BarraDaFase'
 import { EscolherArquivo } from './EscolherArquivo'
 import { enviarArquivo, type StatusDoUpload } from './enviarArquivo'
+import { LinhaDasPerguntas, usePerguntas } from './LinhaDasPerguntas'
 
 export function ComPolling() {
   const [envio, setEnvio] = useState<number>()
   const [idDoUpload, setIdDoUpload] = useState<number>()
   const [status, setStatus] = useState<StatusDoUpload>()
   const [erro, setErro] = useState<string>()
-  const [perguntas, setPerguntas] = useState(0)
+  const { perguntas, inicio, recomecar, perguntar } = usePerguntas()
 
   async function enviar(arquivo: File) {
     setIdDoUpload(undefined)
     setStatus(undefined)
-    setPerguntas(0)
     setErro(undefined)
     setEnvio(0)
     try {
       const { id } = await enviarArquivo(arquivo, setEnvio)
+      recomecar()
       setIdDoUpload(id)
       monitor.tela('envio 100%, processando…')
     } catch (falha) {
@@ -31,20 +32,24 @@ export function ComPolling() {
     }
   }
 
-  // Fase 2: pergunta à API a cada 2 segundos, mesmo quando nada mudou.
-  // A novidade pode esperar até 2s para aparecer, e a maioria das respostas é repetida.
+  // Fase 2: pergunta à API a cada 2 segundos, mude algo ou não.
+  // Na pausa do servidor, a resposta vem repetida; na rajada, a barra pula etapas e a novidade chega até 2s atrasada.
   useEffect(() => {
     if (idDoUpload === undefined) return
+    let ultimo = -1
 
     const intervalo = setInterval(async () => {
-      setPerguntas((n) => n + 1)
+      const responder = perguntar()
       try {
         const atual = await api<StatusDoUpload>(`/uploads/${idDoUpload}`)
+        responder({ progresso: atual.progresso, novidade: atual.progresso !== ultimo })
+        ultimo = atual.progresso
         setStatus(atual)
         monitor.tela(`barra em ${atual.progresso}%`)
         if (atual.progresso === 100) clearInterval(intervalo)
       } catch {
         // Uma pergunta falhou: a próxima, daqui a 2s, tenta de novo.
+        responder({ erro: true })
       }
     }, 2000)
 
@@ -63,7 +68,7 @@ export function ComPolling() {
             valor={status?.progresso ?? 0}
             legenda={status ? `${status.etapa} · ${status.progresso}%` : 'Aguardando…'}
           />
-          <Text fw={600}>Perguntas feitas à API: {perguntas}</Text>
+          <LinhaDasPerguntas perguntas={perguntas} inicio={inicio} />
         </>
       )}
     </Stack>

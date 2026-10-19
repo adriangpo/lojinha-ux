@@ -1,26 +1,27 @@
-import { Alert, Stack, Text } from '@mantine/core'
+import { Alert, Stack } from '@mantine/core'
 import { useEffect, useState } from 'react'
 import { api } from '../../lib/api'
 import { monitor } from '../../lib/monitor'
 import { BarraDaFase } from './BarraDaFase'
 import { EscolherArquivo } from './EscolherArquivo'
 import { enviarArquivo, type StatusDoUpload } from './enviarArquivo'
+import { LinhaDasPerguntas, usePerguntas } from './LinhaDasPerguntas'
 
 export function ComLongPolling() {
   const [envio, setEnvio] = useState<number>()
   const [idDoUpload, setIdDoUpload] = useState<number>()
   const [status, setStatus] = useState<StatusDoUpload>()
   const [erro, setErro] = useState<string>()
-  const [perguntas, setPerguntas] = useState(0)
+  const { perguntas, inicio, recomecar, perguntar } = usePerguntas()
 
   async function enviar(arquivo: File) {
     setIdDoUpload(undefined)
     setStatus(undefined)
-    setPerguntas(0)
     setErro(undefined)
     setEnvio(0)
     try {
       const { id } = await enviarArquivo(arquivo, setEnvio)
+      recomecar()
       setIdDoUpload(id)
       monitor.tela('envio 100%, processando…')
     } catch (falha) {
@@ -31,35 +32,40 @@ export function ComLongPolling() {
     }
   }
 
-  // Fase 2: pergunta "o que mudou depois de X%?" e a API só responde quando houver novidade.
-  // Chegou a resposta, pergunta de novo na hora: sempre tem uma pergunta esperando no servidor.
+  // Fase 2: uma pergunta só, "me avisa quando terminar?", e a API segura a resposta até lá.
+  // A conexão fica aberta o processamento inteiro. Se passar dos 30s sem terminar, a API responde
+  // como está e o front pergunta de novo: é isso que faz ser long *polling*.
   useEffect(() => {
     if (idDoUpload === undefined) return
     const controle = new AbortController()
 
-    async function acompanhar() {
-      let progresso = -1
-      while (progresso < 100 && !controle.signal.aborted) {
-        setPerguntas((n) => n + 1)
+    async function esperarTerminar() {
+      while (!controle.signal.aborted) {
+        const responder = perguntar()
         try {
-          const atual = await api<StatusDoUpload>(`/uploads/${idDoUpload}/novidades?depoisDe=${progresso}`, {
-            signal: controle.signal,
-          })
-          progresso = atual.progresso
+          const atual = await api<StatusDoUpload>(`/uploads/${idDoUpload}/resultado`, { signal: controle.signal })
+          // Só não é novidade quando o prazo de 30s venceu antes de terminar.
+          responder({ progresso: atual.progresso, novidade: atual.progresso === 100 })
           setStatus(atual)
-          monitor.tela(`barra em ${atual.progresso}%`)
+          if (atual.progresso === 100) {
+            monitor.tela('barra em 100%: pronto')
+            return
+          }
         } catch {
           // Saiu da tela: para. Falhou: espera um pouco para não martelar a API.
           if (controle.signal.aborted) return
+          responder({ erro: true })
           await monitor.esperar('espera antes de perguntar de novo', 2000)
         }
       }
     }
-    acompanhar()
+    esperarTerminar()
 
     // Saiu da tela: cancela a pergunta que está esperando no servidor.
     return () => controle.abort()
   }, [idDoUpload])
+
+  const pronto = status?.progresso === 100
 
   return (
     <Stack maw={640}>
@@ -68,12 +74,14 @@ export function ComLongPolling() {
       {envio !== undefined && <BarraDaFase titulo="1. Envio do arquivo" valor={envio} legenda={`${envio}%`} />}
       {idDoUpload !== undefined && (
         <>
+          {/* A resposta só diz "terminou": no meio do caminho, não há porcentagem para mostrar. */}
           <BarraDaFase
             titulo="2. Processamento no servidor"
-            valor={status?.progresso ?? 0}
-            legenda={status ? `${status.etapa} · ${status.progresso}%` : 'Aguardando…'}
+            valor={pronto ? 100 : 0}
+            indeterminada={!pronto}
+            legenda={pronto ? `${status.etapa} · 100%` : 'Esperando o servidor avisar que terminou…'}
           />
-          <Text fw={600}>Perguntas feitas à API: {perguntas}</Text>
+          <LinhaDasPerguntas perguntas={perguntas} inicio={inicio} />
         </>
       )}
     </Stack>

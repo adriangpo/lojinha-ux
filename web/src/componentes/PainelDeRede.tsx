@@ -286,7 +286,12 @@ function LinhaDaRede({ trecho, par, selecionada, aoClicar }: { trecho: Trecho; p
         </span>
       </span>
       <span style={estiloDaCelula}>
-        {trecho.faixa === 'banco' ? trecho.detalhe?.replace(' linhas', ' lin.') : bytesFormatados(trecho.resposta?.bytes)}
+        {/* Conexão SSE: quantas mensagens já chegaram por ela, contando ao vivo. */}
+        {trecho.faixa === 'banco'
+          ? trecho.detalhe?.replace(' linhas', ' lin.')
+          : trecho.mensagens
+            ? `${trecho.mensagens.length} msg`
+            : bytesFormatados(trecho.resposta?.bytes)}
       </span>
       <span style={{ ...estiloDaCelula, borderRight: 'none', textAlign: 'right' }}>
         {pendente ? '…' : `${Math.round(trecho.fim! - trecho.inicio)} ms`}

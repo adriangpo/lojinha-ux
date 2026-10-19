@@ -37,10 +37,28 @@ rotasDeUploads.post('/uploads', async (req, res) => {
   res.status(201).json(upload)
 })
 
+// Como um processamento de verdade, anda aos trancos: pausas longas sem novidade e rajadas rápidas.
+// Nas pausas, o short polling pergunta à toa; nas rajadas, ele pula etapas. O SSE avisa cada passo na hora.
+const PASSOS: [espera: number, progresso: number][] = [
+  [2500, 5], // ficou na fila
+  [300, 10],
+  [300, 15],
+  [300, 20],
+  [300, 30],
+  [3000, 40], // a primeira miniatura demora
+  [300, 50],
+  [300, 60],
+  [300, 70],
+  [2500, 80], // otimizar a imagem também
+  [300, 90],
+  [300, 95],
+  [1500, 100],
+]
+
 // Fase 2: o "worker". Só o servidor sabe em que ponto está, então ele grava no banco.
 async function processar(id: number) {
-  for (let progresso = 5; progresso <= 100; progresso += 5) {
-    await esperar(400)
+  for (const [espera, progresso] of PASSOS) {
+    await esperar(espera)
     await sql('UPDATE uploads SET progresso = $2, etapa = $3 WHERE id = $1', [id, progresso, etapaDe(progresso)])
   }
 }
@@ -73,11 +91,11 @@ ouvinte.on('notification', (aviso) => {
 await ouvinte.connect()
 await ouvinte.query('LISTEN uploads')
 
-// Espera o próximo NOTIFY deste upload, por no máximo `ms`. Sem novidade no prazo, devolve undefined.
-function proximoAviso(id: number, ms: number) {
+// Espera um NOTIFY deste upload que satisfaça `condicao`, por no máximo `ms`. Sem nada no prazo, devolve undefined.
+function proximoAviso(id: number, ms: number, condicao: (status: Status) => boolean) {
   return new Promise<Status | undefined>((resolver) => {
     const aoAvisar = (status: Status) => {
-      if (status.id === id) terminar(status)
+      if (status.id === id && condicao(status)) terminar(status)
     }
     const prazo = setTimeout(() => terminar(undefined), ms)
     function terminar(status: Status | undefined) {
@@ -89,21 +107,21 @@ function proximoAviso(id: number, ms: number) {
   })
 }
 
-// GET /api/uploads/:id/novidades?depoisDe=40 - long polling: a API segura a resposta
-// até o progresso mudar (ou até 30s, devolvendo o mesmo valor). Respondeu, o front pergunta de novo.
-rotasDeUploads.get('/uploads/:id/novidades', async (req, res) => {
+// GET /api/uploads/:id/resultado - long polling: a API segura a resposta até o processamento terminar
+// (ou até 30s, devolvendo como está). Uma conexão aberta o tempo todo, uma resposta só: "ficou pronto".
+rotasDeUploads.get('/uploads/:id/resultado', async (req, res) => {
   const id = Number(req.params.id)
-  // Começa a escutar antes de consultar, para nenhum aviso escapar entre uma coisa e outra.
-  const aviso = proximoAviso(id, 30_000)
+  // Começa a escutar antes de consultar, para o aviso dos 100% não escapar entre uma coisa e outra.
+  const pronto = proximoAviso(id, 30_000, (status) => status.progresso === 100)
 
-  // Já mudou desde a última resposta? Então responde na hora.
+  // Já terminou? Então responde na hora.
   const [atual] = await sql<Status>('SELECT id, progresso, etapa FROM uploads WHERE id = $1', [id])
-  if (atual.progresso !== Number(req.query.depoisDe)) {
+  if (atual.progresso === 100) {
     res.json(atual)
     return
   }
 
-  res.json((await aviso) ?? atual)
+  res.json((await pronto) ?? atual)
 })
 
 // GET /api/uploads/:id/eventos - SSE: a API avisa o front a cada NOTIFY do Postgres.

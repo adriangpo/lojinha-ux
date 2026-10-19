@@ -19,6 +19,8 @@ export type Trecho = {
   progresso?: number
   // Instantes em que chegou um aviso por esta conexão (SSE).
   tiques: number[]
+  // O conteúdo de cada mensagem SSE, para a aba Resposta do painel de Rede.
+  mensagens?: { em: number; dados: string }[]
   // Só nos avisos (mensagens empurradas pelo servidor): de onde veio.
   de?: Faixa
 }
@@ -69,7 +71,13 @@ function aplicar(trechos: Trecho[], evento: EventoMonitor): Trecho[] {
 
     case 'aviso': {
       const comTique = trechos.map((trecho) =>
-        trecho.id === evento.trecho ? { ...trecho, tiques: [...trecho.tiques, evento.em] } : trecho,
+        trecho.id !== evento.trecho
+          ? trecho
+          : {
+              ...trecho,
+              tiques: [...trecho.tiques, evento.em],
+              mensagens: evento.dados === undefined ? trecho.mensagens : [...(trecho.mensagens ?? []), { em: evento.em, dados: evento.dados }],
+            },
       )
       const aviso: Trecho = {
         id: evento.id,
