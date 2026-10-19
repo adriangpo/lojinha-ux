@@ -37,6 +37,7 @@ import { ComSse } from './temas/upload/ComSse'
 import { SemProgresso } from './temas/upload/SemProgresso'
 import { BotaoTravado } from './temas/clique-duplo/BotaoTravado'
 import { ComChaveDeIdempotencia } from './temas/clique-duplo/ComChaveDeIdempotencia'
+import { ComChecagemDeDuplicado } from './temas/clique-duplo/ComChecagemDeDuplicado'
 import { SemProtecao } from './temas/clique-duplo/SemProtecao'
 import { ComBackoff } from './temas/retry/ComBackoff'
 import { RetrySemParar } from './temas/retry/RetrySemParar'
@@ -223,6 +224,7 @@ export const TEMAS: Tema[] = [
       { nome: 'Sem proteção', componente: SemProtecao },
       { nome: 'Botão travado', componente: BotaoTravado },
       { nome: 'Chave de idempotência', componente: ComChaveDeIdempotencia },
+      { nome: 'Pix duplicado', componente: ComChecagemDeDuplicado },
     ],
   },
   {

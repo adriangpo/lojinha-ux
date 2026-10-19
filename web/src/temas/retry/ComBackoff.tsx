@@ -10,7 +10,7 @@ import { buscarProdutos, type Produto } from '../../lib/produtos'
 const ESPERAS = [1000, 2000, 4000]
 
 // Retry só é seguro em operação idempotente: buscar produtos pode repetir à vontade;
-// um POST /pedidos sem chave de idempotência poderia comprar duas vezes.
+// um POST /transferencias sem chave de idempotência poderia enviar o Pix duas vezes.
 export function ComBackoff() {
   const [produtos, setProdutos] = useState<Produto[]>()
   const [erro, setErro] = useState<string>()

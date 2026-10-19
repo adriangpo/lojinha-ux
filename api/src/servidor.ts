@@ -10,10 +10,10 @@ import { rotasDeImagens } from './rotas/imagens'
 import { rotasDeNMais1 } from './rotas/n-mais-1'
 import { rotasDeNovosProdutos } from './rotas/novos-produtos'
 import { rotasDePaginacao } from './rotas/paginacao'
-import { rotasDePedidos } from './rotas/pedidos'
 import { rotasDeProdutos } from './rotas/produtos'
 import { rotasDeSessao } from './rotas/sessao'
 import { rotasDeSignedUrl } from './rotas/signed-url'
+import { rotasDeTransferencias } from './rotas/transferencias'
 import { rotasDeUploads, transmitirProgresso } from './rotas/uploads'
 
 const app = express()
@@ -38,7 +38,7 @@ app.use('/api', rotasDeCacheHttp)
 app.use('/api', rotasDeNMais1)
 app.use('/api', rotasDePaginacao)
 app.use('/api', rotasDeSignedUrl)
-app.use('/api', rotasDePedidos)
+app.use('/api', rotasDeTransferencias)
 app.use('/api', rotasDeCupons)
 app.use('/api', rotasDeSessao)
 app.use('/api', rotasDeUploads)
