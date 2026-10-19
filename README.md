@@ -63,6 +63,7 @@ O que é **infraestrutura** (não precisa mostrar): `monitor`, `controle`, `comp
 - **Latência:** Nenhuma, 300ms, 1s, 3s, Aleatória (200ms a 2s, para layout shift) ou Travada (30s, para timeouts).
 - **Taxa de erro:** 0%, 25%, 50% ou 100% (a API responde 503).
 - **Sessão:** "Expirar sessão agora" (tema Sessão expirada).
+- **Conexão da lojinha:** Online ou Offline (tema Offline). Diferente dos outros, vale para as abas da lojinha e não para a API: `navigator.onLine` fica `false`, os eventos `offline`/`online` disparam e as chamadas falham como sem rede. Mesmo efeito do DevTools → Network → Offline.
 
 Nas demos, o monitor é avisado em uma linha: `monitor.marca` (usuário), `monitor.tela` (tela mudou), `monitor.cache`, `monitor.esperar`, `monitor.progresso` e `monitor.aviso` (`web/src/lib/monitor.ts`).
 
@@ -90,7 +91,7 @@ Na ordem da apresentação, todos os 22 temas estão prontos. Na tabela, o que t
 | Clique duplo e idempotência | Sem proteção / Botão travado / Chave de idempotência / Pix duplicado | Clicar várias vezes em Transferir. Na chave: os cliques extras voltam `409` na hora; mudar o valor no meio do envio dá `422`; "Repetir o último envio" devolve o mesmo Pix até a chave expirar (30s) e depois cria outro. No Pix duplicado: o mesmo valor para a mesma pessoa em menos de 15s é bloqueado (`409` com `Retry-After`) até a janela passar |
 | Rate Limiting | Sem limite / 429 sem explicação / Com Retry-After | Aplicar o cupom várias vezes (limite: 5 em 10s) |
 | Sessão expirada | Perde o formulário / Modal de login | Preencher, "Expirar sessão agora" no monitor, Salvar |
-| Offline e conexão instável | Perde a ação / Fila offline | DevTools → Network → Offline; favoritar; voltar para Online |
+| Offline e conexão instável | Perde a ação / Fila offline | Conexão da lojinha Offline no monitor; favoritar; voltar para Online |
 | Caching | Sem cache / Cache na mão / TanStack Query / Cache HTTP | Trocar de categoria e voltar; no Cache HTTP, a API nem aparece no monitor por 10s |
 | Imagens com signed URL | URL nova a cada vez / URL reaproveitada | Dar F5 com a aba Network aberta |
 | Lazy Loading | Tudo de uma vez / loading="lazy" | Contador de imagens e MB no topo |

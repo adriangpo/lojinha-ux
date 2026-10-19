@@ -6,6 +6,8 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router'
 import { App } from './App'
+// Antes de tudo: o navigator.onLine e os eventos online/offline já respeitam o "Offline" do monitor.
+import './lib/conexao'
 import { monitor } from './lib/monitor'
 
 const queryClient = new QueryClient()

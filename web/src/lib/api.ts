@@ -1,3 +1,4 @@
+import { offlineSimulado } from './conexao'
 import { detalhesDaResposta, monitor } from './monitor'
 
 // Um erro da lista { errors: [...] } que algumas rotas mandam (tema Erros úteis).
@@ -29,6 +30,12 @@ export async function api<T>(caminho: string, { method = 'GET', corpo, signal, h
   const id = crypto.randomUUID()
   const corpoEmTexto = corpo === undefined ? undefined : JSON.stringify(corpo)
   monitor.inicio(id, `${method} ${caminho}`, { requisicao: { cabecalhos: headers, corpo: corpoEmTexto } })
+
+  // "Offline" ligado no monitor: falha igual a um fetch sem rede, sem nem sair do navegador.
+  if (offlineSimulado()) {
+    monitor.fim(id, 'erro', 'offline')
+    throw new TypeError('Failed to fetch')
+  }
 
   let resposta: Response
   try {
