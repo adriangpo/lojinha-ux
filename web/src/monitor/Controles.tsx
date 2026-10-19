@@ -28,10 +28,17 @@ export function Controles() {
   const [controle, setControle] = useState<Controle>()
   const [sessaoExpirada, setSessaoExpirada] = useState(false)
 
+  // Relê a cada 2s: se a API reiniciar (os controles voltam a zero) ou alguém clicar em "Zerar"
+  // na lojinha, o painel mostra o que vale de verdade, e não o que foi escolhido antes.
   useEffect(() => {
-    fetch('/api/controle')
-      .then((resposta) => resposta.json())
-      .then(setControle)
+    const ler = () =>
+      fetch('/api/controle')
+        .then((resposta) => resposta.json())
+        .then(setControle)
+        .catch(() => undefined)
+    ler()
+    const timer = setInterval(ler, 2000)
+    return () => clearInterval(timer)
   }, [])
 
   async function alterar(mudanca: Partial<Controle>) {
