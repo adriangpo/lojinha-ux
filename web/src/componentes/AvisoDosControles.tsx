@@ -1,5 +1,6 @@
 import { Badge, Button, Group } from '@mantine/core'
 import { useEffect, useState } from 'react'
+import { useOfflineSimulado } from '../hooks/useOfflineSimulado'
 
 type Controle = { latencia: number | 'aleatoria'; taxaDeErro: number }
 
@@ -8,6 +9,7 @@ type Controle = { latencia: number | 'aleatoria'; taxaDeErro: number }
 // Usa fetch direto (sem lib/api.ts) para não aparecer no painel de rede.
 export function AvisoDosControles() {
   const [controle, setControle] = useState<Controle>()
+  const [offline, simularOffline] = useOfflineSimulado()
 
   useEffect(() => {
     const ler = () =>
@@ -21,6 +23,7 @@ export function AvisoDosControles() {
   }, [])
 
   async function zerar() {
+    simularOffline(false)
     const resposta = await fetch('/api/controle', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -29,11 +32,14 @@ export function AvisoDosControles() {
     setControle(await resposta.json())
   }
 
-  if (!controle || (controle.latencia === 0 && controle.taxaDeErro === 0)) return null
-
   const partes = []
-  if (controle.latencia !== 0) partes.push(`Latência ${controle.latencia === 'aleatoria' ? 'aleatória' : `${controle.latencia}ms`}`)
-  if (controle.taxaDeErro !== 0) partes.push(`Erro ${controle.taxaDeErro}%`)
+  if (offline) partes.push('Offline')
+  if (controle && controle.latencia !== 0) {
+    partes.push(`Latência ${controle.latencia === 'aleatoria' ? 'aleatória' : `${controle.latencia}ms`}`)
+  }
+  if (controle && controle.taxaDeErro !== 0) partes.push(`Erro ${controle.taxaDeErro}%`)
+
+  if (partes.length === 0) return null
 
   return (
     <Group gap={6}>

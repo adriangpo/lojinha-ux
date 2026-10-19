@@ -1,5 +1,6 @@
 import { Button, Group, SegmentedControl, Stack, Text } from '@mantine/core'
 import { useEffect, useState } from 'react'
+import { useOfflineSimulado } from '../hooks/useOfflineSimulado'
 
 type Controle = {
   latencia: number | 'aleatoria'
@@ -27,6 +28,8 @@ const TAXAS_DE_ERRO = [
 export function Controles() {
   const [controle, setControle] = useState<Controle>()
   const [sessaoExpirada, setSessaoExpirada] = useState(false)
+  // Tema Offline: diferente dos outros, vale para as abas da lojinha, não para a API.
+  const [offline, simularOffline] = useOfflineSimulado()
 
   // Relê a cada 2s: se a API reiniciar (os controles voltam a zero) ou alguém clicar em "Zerar"
   // na lojinha, o painel mostra o que vale de verdade, e não o que foi escolhido antes.
@@ -88,6 +91,20 @@ export function Controles() {
         <Button variant="light" color="red" onClick={expirarSessao}>
           {sessaoExpirada ? 'Sessão expirada ✓' : 'Expirar sessão agora'}
         </Button>
+      </Stack>
+      <Stack gap={4}>
+        <Text size="sm" fw={600}>
+          Conexão da lojinha
+        </Text>
+        <SegmentedControl
+          data={[
+            { label: 'Online', value: 'online' },
+            { label: 'Offline', value: 'offline' },
+          ]}
+          color={offline ? 'yellow' : 'blue'}
+          value={offline ? 'offline' : 'online'}
+          onChange={(valor) => simularOffline(valor === 'offline')}
+        />
       </Stack>
     </Group>
   )
