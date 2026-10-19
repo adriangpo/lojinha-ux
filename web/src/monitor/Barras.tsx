@@ -1,5 +1,5 @@
 import { Box, Group, Paper, Text } from '@mantine/core'
-import { useEffect, useState } from 'react'
+import { useRelogio } from '../hooks/useRelogio'
 import { aparenciaDoTrecho, COR_DA_MARCA, FAIXAS } from './aparencia'
 import type { Trecho } from './useEventos'
 
@@ -204,20 +204,4 @@ function distribuirEmLinhas(trechos: Trecho[], fimDaJanela: number, janela: numb
   }
 
   return { linhaDe, totalDeLinhas: Math.max(1, fimDaLinha.length) }
-}
-
-// Atualiza a cada quadro enquanto houver algo em andamento.
-function useRelogio(rodando: boolean) {
-  const [agora, setAgora] = useState(Date.now())
-
-  useEffect(() => {
-    if (!rodando) return
-    let quadro = requestAnimationFrame(function atualizar() {
-      setAgora(Date.now())
-      quadro = requestAnimationFrame(atualizar)
-    })
-    return () => cancelAnimationFrame(quadro)
-  }, [rodando])
-
-  return agora
 }

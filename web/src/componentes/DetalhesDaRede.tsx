@@ -1,5 +1,5 @@
 import { Highlight, themes } from 'prism-react-renderer'
-import { useState, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react'
 import type { Trecho } from '../monitor/useEventos'
 
 // O painel de baixo da aba Rede: cabeçalhos, corpo enviado e corpo recebido de uma linha.
@@ -17,7 +17,8 @@ export function bytesFormatados(bytes?: number) {
 }
 
 export function DetalhesDaRede({ trecho, fechar }: { trecho: Trecho; fechar: () => void }) {
-  const [aba, setAba] = useState<Aba>('cabecalhos')
+  // Conexão SSE abre direto nas mensagens: é o que se quer ver chegando.
+  const [aba, setAba] = useState<Aba>(trecho.mensagens ? 'resposta' : 'cabecalhos')
   const { requisicao, resposta } = trecho
   // No banco, o que "vai" é o SQL e não há corpo de resposta, só a contagem de linhas.
   const banco = trecho.faixa === 'banco'
@@ -101,7 +102,8 @@ export function DetalhesDaRede({ trecho, fechar }: { trecho: Trecho; fechar: () 
           </>
         )}
         {aba === 'requisicao' && <Corpo texto={requisicao?.corpo} linguagem={banco ? 'sql' : 'json'} />}
-        {aba === 'resposta' && <Corpo texto={resposta?.corpo} linguagem="json" />}
+        {aba === 'resposta' &&
+          (trecho.mensagens ? <Mensagens mensagens={trecho.mensagens} /> : <Corpo texto={resposta?.corpo} linguagem="json" />)}
       </div>
     </div>
   )
@@ -154,6 +156,39 @@ function Par({ nome, valor, mono }: { nome: string; valor: string; mono?: boolea
       <span style={{ ...fonte, color: '#15141a', wordBreak: 'break-all' }}>{valor}</span>
     </div>
   )
+}
+
+// SSE: a resposta nunca termina, então o Firefox lista as mensagens conforme chegam, uma por linha.
+function Mensagens({ mensagens }: { mensagens: { em: number; dados: string }[] }) {
+  const lista = useRef<HTMLDivElement>(null)
+
+  // Acompanha a última mensagem, como o DevTools faz (rolando só o painel; scrollIntoView rolaria a página junto).
+  useEffect(() => {
+    const painel = lista.current?.parentElement
+    if (painel) painel.scrollTop = painel.scrollHeight
+  }, [mensagens.length])
+
+  const celula: CSSProperties = { padding: '2px 10px', borderBottom: `1px solid ${BORDA}`, lineHeight: '17px' }
+  return (
+    <div ref={lista} style={{ fontFamily: MONO }}>
+      <div style={{ ...celula, display: 'grid', gridTemplateColumns: '1fr 96px', background: '#f9f9fb', fontFamily: FONTE, fontWeight: 600 }}>
+        <span>Dados</span>
+        <span>Hora</span>
+      </div>
+      {mensagens.length === 0 && <div style={{ ...celula, color: '#8f8f9d', fontFamily: FONTE }}>Conectado. Esperando a primeira mensagem…</div>}
+      {mensagens.map((mensagem, indice) => (
+        <div key={indice} style={{ ...celula, display: 'grid', gridTemplateColumns: '1fr 96px', gap: 8 }}>
+          <span style={{ wordBreak: 'break-all', color: '#15141a' }}>{mensagem.dados}</span>
+          <span style={{ color: '#5b5b66' }}>{hora(mensagem.em)}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function hora(em: number) {
+  const data = new Date(em)
+  return data.toLocaleTimeString('pt-BR', { hour12: false }) + '.' + String(data.getMilliseconds()).padStart(3, '0')
 }
 
 // JSON formatado e colorido, como a aba Resposta do Firefox. O que não é JSON aparece como veio.

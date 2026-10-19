@@ -26,8 +26,8 @@ export type EventoMonitor =
   // Quanto de um trecho em andamento já foi feito (0 a 1). Ex.: bytes enviados de um upload.
   | { tipo: 'progresso'; id: string; fracao: number; em: number }
   // Mensagem que ninguém pediu na hora: o servidor empurrando (NOTIFY, SSE).
-  // `trecho` é a conexão por onde ela passou, para desenhar um tique na barra.
-  | { tipo: 'aviso'; id: string; de: Faixa; para: Faixa; rotulo: string; em: number; trecho?: string }
+  // `trecho` é a conexão por onde ela passou, para desenhar um tique na barra; `dados`, o que veio nela.
+  | { tipo: 'aviso'; id: string; de: Faixa; para: Faixa; rotulo: string; em: number; trecho?: string; dados?: string }
 
 const NOME_DO_CANAL = 'monitor'
 const canal = new BroadcastChannel(NOME_DO_CANAL)
@@ -57,8 +57,8 @@ export const monitor = {
   progresso(id: string, fracao: number) {
     enviar({ tipo: 'progresso', id, fracao, em: Date.now() })
   },
-  aviso(rotulo: string, de: Faixa, para: Faixa, trecho?: string) {
-    enviar({ tipo: 'aviso', id: novoId(), de, para, rotulo, em: Date.now(), trecho })
+  aviso(rotulo: string, de: Faixa, para: Faixa, trecho?: string, dados?: string) {
+    enviar({ tipo: 'aviso', id: novoId(), de, para, rotulo, em: Date.now(), trecho, dados })
   },
   // Uma espera de propósito, desenhada como barra tracejada. Devolve a Promise da espera.
   esperar(rotulo: string, ms: number) {
