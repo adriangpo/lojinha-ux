@@ -87,7 +87,7 @@ Na ordem da apresentação, todos os 22 temas estão prontos. Na tabela, o que t
 | Upload | Sem progresso / Short polling / Long polling / SSE | Arquivo de ~10 MB; fixar cada versão no monitor e comparar as requests |
 | Timeouts | Sem limite / Com timeout | Latência Travada |
 | Retries e backoff | Sem retry / Retry sem parar / Exponential backoff | Erro 50% ou 100% |
-| Clique duplo e idempotência | Sem proteção / Botão travado / Chave de idempotência | Clicar várias vezes em Comprar |
+| Clique duplo e idempotência | Sem proteção / Botão travado / Chave de idempotência / Pix duplicado | Clicar várias vezes em Transferir. Na chave: os cliques extras voltam `409` na hora; mudar o valor no meio do envio dá `422`; "Repetir o último envio" devolve o mesmo Pix até a chave expirar (30s) e depois cria outro. No Pix duplicado: o mesmo valor para a mesma pessoa em menos de 15s é bloqueado (`409` com `Retry-After`) até a janela passar |
 | Rate Limiting | Sem limite / 429 sem explicação / Com Retry-After | Aplicar o cupom várias vezes (limite: 5 em 10s) |
 | Sessão expirada | Perde o formulário / Modal de login | Preencher, "Expirar sessão agora" no monitor, Salvar |
 | Offline e conexão instável | Perde a ação / Fila offline | DevTools → Network → Offline; favoritar; voltar para Online |
