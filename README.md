@@ -63,6 +63,7 @@ O que é **infraestrutura** (não precisa mostrar): `monitor`, `controle`, `comp
 - **Latência:** Nenhuma, 300ms, 1s, 3s, Aleatória (200ms a 2s, para layout shift) ou Travada (30s, para timeouts).
 - **Taxa de erro:** 0%, 25%, 50% ou 100% (a API responde 503).
 - **Sessão:** "Expirar sessão agora" (tema Sessão expirada).
+- **Signed URL:** "Esquecer URLs assinadas" (tema Imagens com signed URL). A próxima visita à versão "URL reaproveitada" recebe URLs novas e baixa as fotos de novo; as seguintes voltam a usar o cache. Dá para mostrar a diferença só trocando de versão, sem F5 e sem limpar o cache do navegador.
 - **Conexão da lojinha:** Online ou Offline (tema Offline). Diferente dos outros, vale para as abas da lojinha e não para a API: `navigator.onLine` fica `false`, os eventos `offline`/`online` disparam e as chamadas falham como sem rede. Mesmo efeito do DevTools → Network → Offline.
 
 Nas demos, o monitor é avisado em uma linha: `monitor.marca` (usuário), `monitor.tela` (tela mudou), `monitor.cache`, `monitor.esperar`, `monitor.progresso` e `monitor.aviso` (`web/src/lib/monitor.ts`).
@@ -93,7 +94,7 @@ Na ordem da apresentação, todos os 22 temas estão prontos. Na tabela, o que t
 | Sessão expirada | Perde o formulário / Modal de login | Preencher, "Expirar sessão agora" no monitor, Salvar |
 | Offline e conexão instável | Perde a ação / Fila offline | Conexão da lojinha Offline no monitor; favoritar; voltar para Online |
 | Caching | Sem cache / Cache na mão / TanStack Query / Cache HTTP | Trocar de categoria e voltar; no Cache HTTP, a API nem aparece no monitor por 10s |
-| Imagens com signed URL | URL nova a cada vez / URL reaproveitada | Dar F5 com a aba Network aberta |
+| Imagens com signed URL | URL nova a cada vez / URL reaproveitada | "Esquecer URLs assinadas" no monitor; depois alternar entre as versões (ou dar F5): a nova baixa as 12 fotos toda vez, a reaproveitada só na primeira |
 | Lazy Loading | Tudo de uma vez / loading="lazy" | Contador de imagens e MB no topo |
 | N+1 requests | Um endpoint por recurso / Um endpoint por tela | 15 requests vs 1 no monitor |
 | Pagination vs Infinite Scroll | Sem paginação / Páginas numeradas / Infinito com offset / Infinito com cursor | Sem paginação: ver o tamanho da resposta no monitor. Depois, "Simular: alguém publicou agora" e rolar: o offset repete um item |

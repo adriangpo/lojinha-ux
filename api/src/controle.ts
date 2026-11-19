@@ -2,6 +2,7 @@
 // então aqui a gente força as condições do mundo real.
 import { Router, type NextFunction, type Request, type Response } from 'express'
 import { expirarSessoes } from './rotas/sessao'
+import { recomecarPeriodo } from './rotas/signed-url'
 
 type Controle = {
   latencia: number | 'aleatoria'
@@ -24,6 +25,13 @@ rotasDeControle.put('/', (req, res) => {
 // Botão "Expirar sessão agora" (tema Sessão expirada).
 rotasDeControle.post('/expirar-sessoes', (_req, res) => {
   expirarSessoes()
+  res.json({ ok: true })
+})
+
+// Botão "Esquecer URLs assinadas" (tema Imagens com signed URL): a próxima visita à versão
+// "URL reaproveitada" recebe URLs novas e baixa as fotos de novo; as seguintes voltam a usar o cache.
+rotasDeControle.post('/esquecer-urls-assinadas', (_req, res) => {
+  recomecarPeriodo()
   res.json({ ok: true })
 })
 

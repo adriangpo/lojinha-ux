@@ -28,6 +28,7 @@ const TAXAS_DE_ERRO = [
 export function Controles() {
   const [controle, setControle] = useState<Controle>()
   const [sessaoExpirada, setSessaoExpirada] = useState(false)
+  const [urlsEsquecidas, setUrlsEsquecidas] = useState(false)
   // Tema Offline: diferente dos outros, vale para as abas da lojinha, não para a API.
   const [offline, simularOffline] = useOfflineSimulado()
 
@@ -60,6 +61,13 @@ export function Controles() {
     setTimeout(() => setSessaoExpirada(false), 2000)
   }
 
+  // Tema Imagens com signed URL: a versão "URL reaproveitada" volta a baixar as fotos uma vez.
+  async function esquecerUrls() {
+    await fetch('/api/controle/esquecer-urls-assinadas', { method: 'POST' })
+    setUrlsEsquecidas(true)
+    setTimeout(() => setUrlsEsquecidas(false), 2000)
+  }
+
   if (!controle) return null
 
   return (
@@ -90,6 +98,14 @@ export function Controles() {
         </Text>
         <Button variant="light" color="red" onClick={expirarSessao}>
           {sessaoExpirada ? 'Sessão expirada ✓' : 'Expirar sessão agora'}
+        </Button>
+      </Stack>
+      <Stack gap={4}>
+        <Text size="sm" fw={600}>
+          Signed URL
+        </Text>
+        <Button variant="light" onClick={esquecerUrls}>
+          {urlsEsquecidas ? 'URLs esquecidas ✓' : 'Esquecer URLs assinadas'}
         </Button>
       </Stack>
       <Stack gap={4}>
